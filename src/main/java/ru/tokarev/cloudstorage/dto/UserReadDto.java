@@ -6,12 +6,11 @@ import ru.tokarev.cloudstorage.database.entity.Role;
 import java.math.BigDecimal;
 
 @Value
-public class UserCreateEditDto {
+public class UserReadDto {
 
     Long id;
     String username;
     String login;
-    String rawPassword;
     Role role;
     BigDecimal memoryUsage;
 }

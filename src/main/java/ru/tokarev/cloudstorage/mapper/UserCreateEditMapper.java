@@ -1,17 +1,45 @@
 package ru.tokarev.cloudstorage.mapper;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import ru.tokarev.cloudstorage.database.entity.User;
-import ru.tokarev.cloudstorage.dto.UserDto;
+import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
 
-public class UserMapper {
+import java.util.Optional;
 
-    public static UserDto mapper(User user) {
-        return new UserDto(
-                user.getId(),
-                user.getUsername(),
-                user.getLogin(),
-                user.getRole(),
-                user.getMemoryUsage()
-        );
+@Component
+@RequiredArgsConstructor
+public class UserCreateEditMapper implements Mapper<UserCreateEditDto, User> {
+
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public  User map(UserCreateEditDto fromObj,User toObj) {
+        copy(fromObj, toObj);
+        return toObj;
+    }
+
+    @Override
+    public  User map(UserCreateEditDto fromObj) {
+        User user = new User();
+        copy(fromObj, user);
+
+        return user;
+
+    }
+
+    private void copy(UserCreateEditDto fromObj, User toObj) {
+        toObj.setId(fromObj.getId());
+        toObj.setUsername(fromObj.getUsername());
+        toObj.setLogin(fromObj.getLogin());
+        toObj.setMemoryUsage(fromObj.getMemoryUsage());
+        toObj.setRole(fromObj.getRole());
+
+        Optional.ofNullable(fromObj.getRawPassword())
+                .filter(StringUtils::hasText)
+                .map(passwordEncoder::encode)
+                .ifPresent(toObj::setPassword);
     }
 }

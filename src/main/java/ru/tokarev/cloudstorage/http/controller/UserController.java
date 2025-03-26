@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UserController {
 
 
-    @GetMapping
-    public String getCurrentUser() {
-        UserDetails currentUserObject = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-
-    }
+//    @GetMapping
+//    public String getCurrentUser() {
+//        UserDetails currentUserObject = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//
+//
+//    }
 }

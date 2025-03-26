@@ -5,8 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.database.repositorty.UserRepository;
-import ru.tokarev.cloudstorage.dto.UserDto;
-import ru.tokarev.cloudstorage.mapper.UserMapper;
+import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
+import ru.tokarev.cloudstorage.dto.UserReadDto;
+import ru.tokarev.cloudstorage.mapper.UserCreateEditMapper;
+import ru.tokarev.cloudstorage.mapper.UserReadMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +18,8 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserCreateEditMapper userCreateEditMapper;
+    private final UserReadMapper userReadMapper;
 
 
     public Optional<User> findById(Long id) {
@@ -23,9 +27,9 @@ public class UserService {
                 .findById(id);
     }
 
-    public List<UserDto> findAll() {
+    public List<UserReadDto> findAll() {
         return userRepository.findAll().stream()
-                .map(UserMapper::mapper)
+                .map(userReadMapper::map)
                 .toList();
     }
 
@@ -44,8 +48,20 @@ public class UserService {
                 .orElse(false);
     }
 
-    //TODO make logic
-    public Optional<UserDto> update(Long id, UserDto userDto) {
-        return Optional.empty();
+    public Optional<UserReadDto> update(Long id, UserCreateEditDto userCreateEditDto) {
+        return userRepository.findById(id)
+                .map(entity -> {
+                    return userCreateEditMapper.map(userCreateEditDto, entity);
+                })
+                .map(userRepository::saveAndFlush)
+                .map(userReadMapper::map);
+    }
+
+    public UserReadDto create(UserCreateEditDto userCreateEditDto) {
+        return Optional.of(userCreateEditDto)
+                .map(userCreateEditMapper::map)
+                .map(userRepository::save)
+                .map(userReadMapper::map)
+                .orElseThrow();
     }
 }
