@@ -14,7 +14,7 @@ public class UserReadMapper implements Mapper<User, UserReadDto> {
                 obj.getUsername(),
                 obj.getLogin(),
                 obj.getRole(),
-                obj.getMemoryUsage()
+                obj.getBucket()
         );
     }
 

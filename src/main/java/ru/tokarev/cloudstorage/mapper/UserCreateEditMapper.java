@@ -34,7 +34,7 @@ public class UserCreateEditMapper implements Mapper<UserCreateEditDto, User> {
         toObj.setId(fromObj.getId());
         toObj.setUsername(fromObj.getUsername());
         toObj.setLogin(fromObj.getLogin());
-        toObj.setMemoryUsage(fromObj.getMemoryUsage());
+        toObj.setBucket(fromObj.getBucket());
         toObj.setRole(fromObj.getRole());
 
         Optional.ofNullable(fromObj.getRawPassword())

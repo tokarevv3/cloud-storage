@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name = "users")
 @Data
@@ -16,15 +14,18 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
-    String login;
-    String password;
 
-    String username;
+    private String login;
+    private String password;
 
-    Role role;
+    private String username;
 
-    BigDecimal memoryUsage;
+    private Role role;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "bucket_id")
+    private Bucket bucket;
 
 }

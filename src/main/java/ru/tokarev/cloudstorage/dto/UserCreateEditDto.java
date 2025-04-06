@@ -1,6 +1,7 @@
 package ru.tokarev.cloudstorage.dto;
 
 import lombok.Value;
+import ru.tokarev.cloudstorage.database.entity.Bucket;
 import ru.tokarev.cloudstorage.database.entity.Role;
 
 import java.math.BigDecimal;
@@ -13,5 +14,5 @@ public class UserCreateEditDto {
     String login;
     String rawPassword;
     Role role;
-    BigDecimal memoryUsage;
+    Bucket bucket;
 }

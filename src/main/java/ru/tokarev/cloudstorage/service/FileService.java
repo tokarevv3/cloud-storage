@@ -26,61 +26,12 @@ public class FileService {
 
     private final MinioClient minioClient;
 
+    public Iterable<Result<Item>> getFilesList(String bucketName, String folderName) {
 
-    public boolean isBucketExists(String bucketName) {
+        folderName = isSlashEnded(folderName);
+        System.out.println(folderName);
         try {
-            return minioClient.bucketExists(BucketExistsArgs.builder()
-                    .bucket(bucketName)
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean createBucket(String bucketName) {
-        try {
-            minioClient.makeBucket(MakeBucketArgs.builder()
-                    .bucket(bucketName)
-
-                    .build());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public Long getBucketSize(String bucketName) {
-        long totalSize = 0;
-
-//        var objects = minioClient.listObjects()
-        return totalSize;
-    }
-
-    public LifecycleConfiguration getBucket(String bucketName) {
-        try {
-            return minioClient.getBucketLifecycle(GetBucketLifecycleArgs.builder()
-                    .bucket(bucketName)
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public List<Bucket> getBucketsList() {
-        try {
-            return minioClient.listBuckets();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public ArrayList<Result<Item>> getFilesList(String bucketName, String folderName) {
-        try {
-            return (ArrayList<Result<Item>>) minioClient.listObjects(ListObjectsArgs.builder()
+            return minioClient.listObjects(ListObjectsArgs.builder()
                     .bucket(bucketName)
                     .prefix(folderName)
                     .build());
@@ -89,52 +40,52 @@ public class FileService {
         }
     }
 
-    public ArrayList<Result<Item>> getFolderList(String bucketName) {
-
-        ArrayList<Result<Item>> folderList = new ArrayList<>();
-
-        try {
-            Iterable<Result<Item>> objectsList = minioClient.listObjects(ListObjectsArgs.builder()
-                    .bucket(bucketName)
-                    .build());
-            for (var object : objectsList) {
-                if (object.get().isDir()) {
-                    folderList.add(object);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        return folderList;
-    }
-
-    public ArrayList<Result<Item>> getFolderList(String bucketName, String folderName) {
-
-        ArrayList<Result<Item>> folderList = new ArrayList<>();
-
-        try {
-            Iterable<Result<Item>> objectsList = minioClient.listObjects(ListObjectsArgs.builder()
-                    .bucket(bucketName)
-                    .prefix(folderName)
-                    .build());
-            for (var object : objectsList) {
-                if (object.get().isDir()) {
-                    folderList.add(object);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        return folderList;
-    }
+//    public ArrayList<Result<Item>> getFolderList(String bucketName) {
+//
+//        ArrayList<Result<Item>> folderList = new ArrayList<>();
+//
+//        try {
+//            Iterable<Result<Item>> objectsList = minioClient.listObjects(ListObjectsArgs.builder()
+//                    .bucket(bucketName)
+//                    .build());
+//            for (var object : objectsList) {
+//                if (object.get().isDir()) {
+//                    folderList.add(object);
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//        return folderList;
+//    }
+//
+//    public ArrayList<Result<Item>> getFolderList(String bucketName, String folderName) {
+//
+//        folderName = isSlashEnded(folderName);
+//
+//        ArrayList<Result<Item>> folderList = new ArrayList<>();
+//
+//        try {
+//            Iterable<Result<Item>> objectsList = minioClient.listObjects(ListObjectsArgs.builder()
+//                    .bucket(bucketName)
+//                    .prefix(folderName)
+//                    .build());
+//            for (var object : objectsList) {
+//                if (object.get().isDir()) {
+//                    folderList.add(object);
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//        return folderList;
+//    }
 
     public boolean createFolder(String bucketName, String parentFolderName, String folderName) {
 
-        if (folderName.charAt(folderName.length() - 1) != '/') {
-            folderName = folderName + '/';
-        }
+        folderName = isSlashEnded(folderName);
 
         try {
             minioClient.putObject(PutObjectArgs.builder()
@@ -187,5 +138,12 @@ public class FileService {
         }
 
         return uploadedFiles;
+    }
+
+    public static String isSlashEnded(String path) {
+        if (path.charAt(path.length() - 1) != '/') {
+            path = path + '/';
+        }
+        return path;
     }
 }
