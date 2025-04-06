@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload file to MinIO cloud storage</title>
+</head>
+<body>
+<form th:action="@{/api/upload/file}" enctype="multipart/form-data" method="post">
+  <label for="file">Input file:
+    <input id="file" type="file" name="file">
+  </label><br>
+  <button type="submit">Send</button>
+</form>
+
+<form th:action="@{/api/upload/folder}" enctype="multipart/form-data" method="post">
+  <label for="folder">Input folder:
+    <input id="folder" type="file" webkitdirectory name="folder">
+  </label><br>
+  <button type="submit">Send</button>
+</form>
+
+</body>
+</html>
