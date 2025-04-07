@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="File")
+@Table(name="Files")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,8 +22,6 @@ public class File {
     private Long id;
 
     private String fileName;
-
-    private String publicName;
 
     private String filePath;
 

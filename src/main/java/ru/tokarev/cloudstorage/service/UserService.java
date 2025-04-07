@@ -15,6 +15,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -60,7 +61,7 @@ public class UserService {
     public UserReadDto create(UserCreateEditDto userCreateEditDto) {
         return Optional.of(userCreateEditDto)
                 .map(userCreateEditMapper::map)
-                .map(userRepository::save)
+                .map(userRepository::saveAndFlush)
                 .map(userReadMapper::map)
                 .orElseThrow();
     }

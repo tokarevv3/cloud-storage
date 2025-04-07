@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 @Value
 public class UserCreateEditDto {
 
-    Long id;
     String username;
     String login;
     String rawPassword;

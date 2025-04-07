@@ -2,6 +2,7 @@ package ru.tokarev.cloudstorage.database.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class User {
 
     @Id
@@ -25,7 +27,7 @@ public class User {
     private Role role;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "bucket_id")
+    @JoinColumn(name = "bucketId")
     private Bucket bucket;
 
 }

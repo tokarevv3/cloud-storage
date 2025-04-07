@@ -1,11 +1,10 @@
-package ru.tokarev.cloudstorage.http.controller;
+package ru.tokarev.cloudstorage.http.controller.rest;
 
 import io.minio.Result;
 import io.minio.messages.Item;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.tokarev.cloudstorage.service.FileService;
@@ -30,6 +29,7 @@ public class FileFolderController {
         if (folderPath.isEmpty()) {
             return null;
         }
+        //TODO: change bucketName to user`s bucketName (via SecurityContextHolder)
         Iterable<Result<Item>> folderList = fileService.getFilesList("base-bucket", folderPath);
         ArrayList<String> folderNames = new ArrayList<>();
 

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "buckets")
 @Data
 @ToString(exclude = "folders")
 @EqualsAndHashCode(of = "name")
@@ -29,6 +30,10 @@ public class Bucket {
     private User user;
 
     @Builder.Default
-    @OneToMany(mappedBy = "bucket")
+    @OneToMany(mappedBy = "bucketId")
     private List<Folder> folders = new ArrayList<>();
+
+    @OneToOne
+    @JoinColumn(name="folder_id")
+    private Folder rootFolderId;
 }

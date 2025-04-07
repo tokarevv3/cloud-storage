@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.tokarev.cloudstorage.database.entity.Folder;
+import ru.tokarev.cloudstorage.database.repositorty.FolderRepository;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,11 +27,11 @@ import java.util.List;
 public class FileService {
 
     private final MinioClient minioClient;
+    private final FolderRepository folderRepository;
 
     public Iterable<Result<Item>> getFilesList(String bucketName, String folderName) {
 
         folderName = isSlashEnded(folderName);
-        System.out.println(folderName);
         try {
             return minioClient.listObjects(ListObjectsArgs.builder()
                     .bucket(bucketName)
@@ -86,6 +88,13 @@ public class FileService {
     public boolean createFolder(String bucketName, String parentFolderName, String folderName) {
 
         folderName = isSlashEnded(folderName);
+        String path = parentFolderName + "/" + folderName;
+
+        Folder createdFolder = Folder.builder()
+                .name(folderName)
+                .path(path)
+                .parentId(folderRepository.getFolderByPath(path))
+                .build();
 
         try {
             minioClient.putObject(PutObjectArgs.builder()
@@ -93,12 +102,15 @@ public class FileService {
                             .object(parentFolderName + folderName)
                             .stream(new ByteArrayInputStream(new byte[0]), 0, 0)
                     .build());
+            folderRepository.saveAndFlush(createdFolder);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
+
+
 
     public boolean uploadFile(String bucketName, String fileName, InputStream inputStream, long size) {
 
