@@ -24,6 +24,6 @@ public class FolderCreateEditMapper implements Mapper<FolderCreateEditDto, Folde
         toObj.setPath(fromObj.getPath());
         toObj.setBucketId(fromObj.getBucketId());
         toObj.setUploadedAt(fromObj.getUploadedAt());
-        toObj.setParentId(fromObj.getParentId());
+        toObj.setParent(fromObj.getParentId());
     }
 }

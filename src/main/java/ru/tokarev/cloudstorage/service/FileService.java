@@ -93,7 +93,7 @@ public class FileService {
         Folder createdFolder = Folder.builder()
                 .name(folderName)
                 .path(path)
-                .parentId(folderRepository.getFolderByPath(path))
+                .parent(folderRepository.getFolderByPath(path))
                 .build();
 
         try {
@@ -111,7 +111,7 @@ public class FileService {
     }
 
 
-
+    //TODO: pure SQL method, disctruct to s3service upload method
     public boolean uploadFile(String bucketName, String fileName, InputStream inputStream, long size) {
 
         try {

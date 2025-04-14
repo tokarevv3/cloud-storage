@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class Folder {
 
     @Id
@@ -29,10 +30,10 @@ public class Folder {
     @ManyToOne(fetch = FetchType.LAZY)
     @Nullable
     @JoinColumn(name="parent_id")
-    private Folder parentId;
+    private Folder parent;
 
-    @OneToMany(mappedBy = "parentId")
-    private List<Folder> childId = new ArrayList<>();
+    @OneToMany(mappedBy = "parent")
+    private List<Folder> child = new ArrayList<>();
 
     @ManyToOne
     @Nullable
