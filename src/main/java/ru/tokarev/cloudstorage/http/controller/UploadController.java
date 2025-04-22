@@ -38,19 +38,19 @@ public class UploadController {
 //        }
 //    }
 
-    @PostMapping("/upload/file")
-    @ResponseBody
-    public boolean upload(MultipartFile file) {
-        try {
-            return fileService.uploadFile("base-bucket", file.getOriginalFilename(), file.getInputStream(), file.getSize());
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-        return false;
-    }
-
-    @GetMapping("/upload")
-    public String uploadPage() {
-        return "upload";
-    }
+//    @PostMapping("/upload/file")
+//    @ResponseBody
+//    public boolean upload(MultipartFile file) {
+//        try {
+//            return fileService.uploadFile("base-bucket", file.getOriginalFilename(), file.getInputStream(), file.getSize());
+//        } catch (IOException e) {
+//            System.out.println(e.getMessage());
+//        }
+//        return false;
+//    }
+//
+//    @GetMapping("/upload")
+//    public String uploadPage() {
+//        return "upload";
+//    }
 }

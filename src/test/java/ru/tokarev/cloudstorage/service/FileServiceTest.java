@@ -13,8 +13,6 @@ import ru.tokarev.cloudstorage.TestCloudStorateApplication;
 import ru.tokarev.cloudstorage.database.repositorty.FileRepository;
 import ru.tokarev.cloudstorage.database.repositorty.FolderRepository;
 
-import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,7 +41,7 @@ public class FileServiceTest {
 
     @Test
     void checkBucketInfo() {
-        var bucket = bucketService.getBucket(defaultBucketName);
+        var bucket = bucketService.getBucketByName(defaultBucketName);
         System.out.println(bucket);
         assertTrue(true);
     }
@@ -62,7 +60,7 @@ public class FileServiceTest {
     void checkin() {
         String defaultFolderName = "mods/";
 
-        fileService.createFolder(defaultBucketName, "", "test");
+        //fileService.createFolder(defaultBucketName, "", "test");
 
         Iterable<Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder()
                 .bucket(defaultBucketName)

@@ -19,7 +19,6 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
      @Query("select f from Folder f where f.parent = :parent")
      List<Folder> getAllFoldersByParentId(@Param("parent") Folder parent);
 
-     @Query("select f from File f where f.folder = :parent")
-     List<File> getAllFilesByParentId(@Param("parent") Folder parent);
+
 
 }
