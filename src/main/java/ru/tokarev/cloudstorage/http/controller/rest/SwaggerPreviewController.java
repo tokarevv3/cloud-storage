@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/swagger")
 @RequiredArgsConstructor
 @Slf4j
 public class SwaggerPreviewController {

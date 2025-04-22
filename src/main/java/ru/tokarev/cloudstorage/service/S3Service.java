@@ -57,6 +57,22 @@ public class S3Service {
             return null;
         }
     }
+    public boolean uploadFile(Long userId, String filePathName, InputStream inputStream, long size) {
+
+        String bucketName = defaultBucketName + userId;
+
+        try {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(filePathName)
+                    .stream(inputStream, size, -1)
+                    .build());
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     public boolean uploadFile(String bucketName, String filePathName, InputStream inputStream, long size) {
 

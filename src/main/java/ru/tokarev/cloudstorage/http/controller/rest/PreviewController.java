@@ -17,7 +17,6 @@ import java.util.Map;
 @Slf4j
 public class PreviewController {
 
-    private final FileService fileService;
     private final PreviewService previewService;
 
     @GetMapping("/**")

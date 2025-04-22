@@ -2,13 +2,16 @@ package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.tokarev.cloudstorage.database.entity.File;
 import ru.tokarev.cloudstorage.database.entity.Folder;
+import ru.tokarev.cloudstorage.database.entity.User;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,6 +22,7 @@ public class PreviewService {
     private final FolderService folderService;
     private final FileService fileService;
     private final S3Service s3Service;
+    private final UserService userService;
 
     public Map<Long, String> getListOfFilesAndFoldersInFolder(String path) {
 
@@ -31,22 +35,35 @@ public class PreviewService {
                 folderService.getFoldersInFolder(folderByPath).stream(),
                 fileService.getFilesInFolder(folderByPath).stream()
         ).collect(Collectors.toMap(
-                this::getIdFromObject, // метод, извлекающий ID
+                this::getIdFromObject,
                 this::getNameFromObject
         ));
     }
 
-    // TODO:: Get from securityContext user and his id. Put that id into bucket name.
     public boolean uploadFile(MultipartFile file, String path)  {
 
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long currentUserId = userService.findByUsername(principal.getUsername()).get().getId();
+
         try {
-            fileService.uploadFile(file.getOriginalFilename(), path, file.getSize(), file.getContentType());
-            s3Service.uploadFile("get-bucket-name-from-id", file.getOriginalFilename(), file.getInputStream(), file.getSize());
-            return true;
+            if (fileService.uploadFile(
+                    file.getOriginalFilename(),
+                    path,
+                    file.getSize(),
+                    file.getContentType()) &&
+            s3Service.uploadFile(
+                    currentUserId,
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getSize())
+            ) {
+                return true;
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
+        return false;
     }
 
     private Long getIdFromObject(Object obj) {
