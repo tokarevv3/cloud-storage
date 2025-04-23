@@ -1,6 +1,7 @@
 package ru.tokarev.cloudstorage.http.controller.rest;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,7 +10,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.tokarev.cloudstorage.dto.JwtResponse;
 import ru.tokarev.cloudstorage.dto.LoginRequest;
+import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
 import ru.tokarev.cloudstorage.provider.JwtTokenProvider;
+import ru.tokarev.cloudstorage.service.UserService;
 
 /**
  *  Front-end server send to /api/auth/login end-point loginRequest object with username and password.
@@ -21,18 +24,18 @@ import ru.tokarev.cloudstorage.provider.JwtTokenProvider;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @CrossOrigin
+@Slf4j
 public class LoginController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-
-        System.out.println("reach that point!");
-        System.out.println(loginRequest.getUsername() + " " + loginRequest.getPassword());
-
+        log.info("User with login: " + loginRequest.getUsername() + " is trying to log in.");
         Authentication authentication = null;
+
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -40,13 +43,40 @@ public class LoginController {
                             loginRequest.getPassword()
                     )
             );
+            log.info("Successfully logged in for user: " + loginRequest.getUsername());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String jwt = tokenProvider.generateToken(authentication);
+            return ResponseEntity.ok(new JwtResponse(jwt));
         } catch (Exception e) {
             e.printStackTrace();
+            return ResponseEntity.badRequest().body("Wrong username or password.");
         }
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String jwt = tokenProvider.generateToken(authentication);
-        return ResponseEntity.ok(new JwtResponse(jwt));
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody UserCreateEditDto userDto) {
+        log.info("Registering user with login: " + userDto.getUsername());
+
+        try {
+            userService.create(userDto);
+
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            userDto.getUsername(),
+                            userDto.getRawPassword()
+                    )
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = tokenProvider.generateToken(authentication);
+
+            return ResponseEntity.ok(new JwtResponse(jwt));
+        } catch (Exception e) {
+            log.error("Registration error: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Ошибка регистрации: " + e.getMessage());
+        }
+    }
+
 }
