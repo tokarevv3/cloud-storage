@@ -6,11 +6,16 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.tokarev.cloudstorage.dto.JwtResponse;
 import ru.tokarev.cloudstorage.dto.LoginRequest;
 import ru.tokarev.cloudstorage.provider.JwtTokenProvider;
+
+/**
+ *  Front-end server send to /api/auth/login end-point loginRequest object with username and password.
+ *  Controller trying to authenticate that user, and if success then set authentication in SecurityContextHolder
+ *  and generate token of user and return it.
+ */
 
 @RestController
 @RequestMapping("/api/auth")
