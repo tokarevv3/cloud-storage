@@ -93,4 +93,8 @@ public class BucketService {
         return bucketRepository.findById(id);
     }
 
+    public Optional<Bucket> saveBucket(Bucket bucket) {
+        return Optional.of(bucketRepository.saveAndFlush(bucket));
+    }
+
 }

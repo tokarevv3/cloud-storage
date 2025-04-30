@@ -1,6 +1,7 @@
 package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.tokarev.cloudstorage.database.entity.Bucket;
 import ru.tokarev.cloudstorage.database.entity.Folder;
@@ -13,6 +14,7 @@ import ru.tokarev.cloudstorage.mapper.FolderReadMapper;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FolderService {
@@ -25,7 +27,7 @@ public class FolderService {
 
     public Optional<FolderReadDto> createFolder(String folderName, Long folderId) {
         Folder parentFolder = folderRepository.getFolderById(folderId);
-        String path = parentFolder.getPath() + "/" + folderName;
+        String path = parentFolder.getPath() + parentFolder.getName() + "/";
 
         FolderCreateEditDto folderCreateEditDto = new FolderCreateEditDto(
                 folderName,
@@ -34,7 +36,12 @@ public class FolderService {
                 parentFolder,
                 parentFolder.getBucketId());
 
-        if (s3Service.createFolder(parentFolder.getBucketId().getName(), folderCreateEditDto.getName(), folderCreateEditDto.getPath())) {
+        log.info("Trying to create folder with part : " + folderCreateEditDto.getPath());
+
+        if (s3Service.createFolder(
+                parentFolder.getBucketId().getName(),
+                folderCreateEditDto.getName(),
+                folderCreateEditDto.getPath())) {
             return Optional.of(folderCreateEditDto)
                     .map(folderCreateEditMapper::map)
                     .map(folderRepository::saveAndFlush)
@@ -47,13 +54,20 @@ public class FolderService {
     }
 
     public Optional<Folder> createRootFolder(String bucketName) {
+
+        Bucket bucket = bucketService.getBucketByName(bucketName).get();
+
         Optional<Folder> createdFolder = Optional.of(Folder.builder()
                 .name("root-folder")
                 .path("/")
                 .uploadedAt(LocalDateTime.now())
                 .parent(null)
-                .bucketId(bucketService.getBucketByName(bucketName).get()) //may be null
+                .bucketId(bucket) //may be null
                 .build());
+
+        bucket.setRootFolder(createdFolder.orElse(null));
+
+        bucketService.saveBucket(bucket);
 
         if (s3Service.createRootFolder(bucketName)) {
             return createdFolder
@@ -68,6 +82,14 @@ public class FolderService {
 
     public Folder getFolderByPathAndBucket(String path, Bucket bucket) {
         return folderRepository.getFolderByPathAndBucketId(path, bucket);
+    }
+
+    public Folder getFolderByNameAndBucket(String folderName, Bucket bucket) {
+        return folderRepository.getFolderByNameAndBucketId(folderName, bucket);
+    }
+
+    public Folder getFolderByNameAndPathAndBucket(String folderName, String path, Bucket bucket) {
+        return folderRepository.getFolderByNameAndPathAndBucketId(folderName, path, bucket);
     }
 
     public List<Folder> getFoldersInFolder(Folder folder) {

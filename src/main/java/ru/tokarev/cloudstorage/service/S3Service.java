@@ -1,11 +1,13 @@
 package ru.tokarev.cloudstorage.service;
 
+import io.minio.GetObjectArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.errors.MinioException;
 import io.minio.messages.Bucket;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +16,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3Service {
@@ -64,7 +67,7 @@ public class S3Service {
         try {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
-                    .object("root-folder/" + filePathName)
+                    .object(filePathName)
                     .stream(inputStream, size, -1)
                     .build());
             return true;
@@ -157,6 +160,19 @@ public class S3Service {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public MultipartFile downloadFile(String bucketName, String fileName) {
+        try {
+            log.info("Trying to download file: " + fileName);
+            return (MultipartFile) minioClient.getObject(GetObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fileName)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

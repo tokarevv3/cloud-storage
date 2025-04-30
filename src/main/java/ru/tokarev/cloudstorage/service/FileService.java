@@ -3,11 +3,9 @@ package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.tokarev.cloudstorage.database.entity.File;
-import ru.tokarev.cloudstorage.database.entity.Folder;
-import ru.tokarev.cloudstorage.database.entity.Type;
-import ru.tokarev.cloudstorage.database.entity.User;
+import ru.tokarev.cloudstorage.database.entity.*;
 import ru.tokarev.cloudstorage.database.repositorty.FileRepository;
+import ru.tokarev.cloudstorage.dto.FileReadDto;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -32,12 +30,9 @@ public class FileService {
         return fileRepository.findById(id);
     }
 
+
     //TODO: pure SQL method, disctruct to s3service upload method
-    public boolean uploadFile(String fileName, String filePath, long size, String contentType) {
-
-        User authenticatedUser = loginService.getAuthenticatedUser();
-
-        Folder folder = folderService.getFolderByPathAndBucket(filePath, authenticatedUser.getBucket());
+    public boolean uploadFile(String fileName, String filePath, long size, String contentType, Folder parentFolder) {
 
         File file = File.builder()
                 .fileName(fileName)
@@ -46,7 +41,7 @@ public class FileService {
                 .contentType(contentType)
                 .uploadedAt(LocalDateTime.now())
                 .fileType(Type.UNKNOWN)
-                .folder(folder)
+                .folder(parentFolder)
                 .build();
 
         fileRepository.saveAndFlush(file);
