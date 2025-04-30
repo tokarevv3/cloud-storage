@@ -1,6 +1,7 @@
 package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -61,12 +63,11 @@ public class UserService implements UserDetailsService {
                 .map(userReadMapper::map);
     }
 
-    public UserReadDto create(UserCreateEditDto userCreateEditDto) {
+    public Optional<User> create(UserCreateEditDto userCreateEditDto) {
         return Optional.of(userCreateEditDto)
                 .map(userCreateEditMapper::map)
-                .map(userRepository::saveAndFlush)
-                .map(userReadMapper::map)
-                .orElseThrow();
+                .map(userRepository::saveAndFlush);
+//                .map(userReadMapper::map)
     }
 
     @Override
@@ -80,6 +81,7 @@ public class UserService implements UserDetailsService {
     }
 
     public Optional<User> findByUsername(String username) {
+        log.info("Call of method findByUsername");
         return userRepository.findByUsername(username);
     }
 }

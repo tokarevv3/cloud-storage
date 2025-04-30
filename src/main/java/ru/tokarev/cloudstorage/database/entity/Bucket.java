@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "buckets")
 @Data
-@ToString(exclude = "folders")
+@ToString(exclude = {"folders", "user"})
 @EqualsAndHashCode(of = "name")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,15 +25,15 @@ public class Bucket {
 
     private Long size;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
     private User user;
 
     @Builder.Default
-    @OneToMany(mappedBy = "bucketId")
+    @OneToMany(mappedBy = "bucketId", fetch = FetchType.LAZY)
     private List<Folder> folders = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="folder_id")
-    private Folder rootFolderId;
+    private Folder rootFolder;
 }

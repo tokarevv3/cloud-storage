@@ -27,6 +27,6 @@ public class BucketServiceTest {
                 null
         );
 
-        bucketService.createBucket(user.getId(), user);
+        bucketService.createBucket(user);
     }
 }

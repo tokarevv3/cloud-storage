@@ -7,14 +7,11 @@ import ru.tokarev.cloudstorage.database.entity.Bucket;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.database.repositorty.BucketRepository;
 import ru.tokarev.cloudstorage.dto.BucketCreateEditDto;
-import ru.tokarev.cloudstorage.dto.BucketReadDto;
 import ru.tokarev.cloudstorage.mapper.BucketCreateEditMapper;
 import ru.tokarev.cloudstorage.mapper.BucketReadMapper;
 
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Service return Bucket class instead of BucketReadDto because information is for admin only.
@@ -33,8 +30,8 @@ public class BucketService {
     private final String defaultBucketName = "user-bucket-";
 
     // What it really should to return? boolean or DTO?
-    public Bucket createBucket(Long id, User user) {
-        String bucketName = defaultBucketName + id;
+    public Optional<Bucket> createBucket( User user) {
+        String bucketName = defaultBucketName + user.getId();
 
         BucketCreateEditDto bucket = new BucketCreateEditDto(
                 bucketName,
@@ -42,19 +39,18 @@ public class BucketService {
                 user,
                 null);
 
-        Bucket bucketReadDto = Optional.of(bucket)
-                .map(bucketCreateEditMapper::map)
-                .map(bucketRepository::saveAndFlush)
-                .orElseThrow();
+
+
+        Optional<Bucket> bucketReadDto = Optional.of(bucket).map(bucketCreateEditMapper::map);
+
+        user.setBucket(bucketReadDto.get());
+
+        bucketReadDto.map(bucketRepository::saveAndFlush).orElseThrow();
 
         if (s3Service.createBucket(bucketName)) {
             return bucketReadDto;
         }
         return null;
-    }
-
-    public Optional<Bucket> getBucketByName(Long id) {
-        return bucketRepository.findById(id);
     }
 
     //TODO: maybe shall change to database?

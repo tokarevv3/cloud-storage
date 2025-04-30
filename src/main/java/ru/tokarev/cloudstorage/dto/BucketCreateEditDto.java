@@ -10,5 +10,5 @@ public class BucketCreateEditDto {
     String name;
     Long size;
     User user;
-    Folder rootFolderId;
+    Folder rootFolder;
 }

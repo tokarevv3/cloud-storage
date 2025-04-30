@@ -25,6 +25,6 @@ public class BucketCreateEditMapper implements Mapper<BucketCreateEditDto, Bucke
         toObj.setName(fromObj.getName());
         toObj.setSize(fromObj.getSize());
         toObj.setUser(fromObj.getUser());
-        toObj.setRootFolderId(fromObj.getRootFolderId());
+        toObj.setRootFolder(fromObj.getRootFolder());
     }
 }

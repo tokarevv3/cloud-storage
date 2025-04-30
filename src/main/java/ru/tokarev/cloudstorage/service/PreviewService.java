@@ -1,6 +1,7 @@
 package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -11,25 +12,36 @@ import ru.tokarev.cloudstorage.database.entity.User;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PreviewService {
 
     private final FolderService folderService;
     private final FileService fileService;
     private final S3Service s3Service;
     private final UserService userService;
+    private final LoginService loginService;
 
     public Map<Long, String> getListOfFilesAndFoldersInFolder(String path) {
 
-        System.out.println(path);
+        User currentUser = loginService.getAuthenticatedUser();
 
-        Folder folderByPath = folderService.getFolderByPath(path);
-        System.out.println(folderByPath.getName());
+        log.info("Trying to get path: " + path);
+
+        Folder folderByPath = folderService.getFolderByPathAndBucket(path, currentUser.getBucket());
+
+        if (folderByPath == null) {
+            log.info("Cannot find folder owner. Maybe path is wrong or belongs to other bucket?");
+            return null;
+        }
+
+        log.info("Found folder owner of path: " + folderByPath);
+
+
 
         return Stream.concat(
                 folderService.getFoldersInFolder(folderByPath).stream(),
@@ -42,8 +54,7 @@ public class PreviewService {
 
     public boolean uploadFile(MultipartFile file, String path)  {
 
-        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long currentUserId = userService.findByUsername(principal.getUsername()).get().getId();
+        User currentUser = loginService.getAuthenticatedUser();
 
         try {
             if (fileService.uploadFile(
@@ -52,7 +63,7 @@ public class PreviewService {
                     file.getSize(),
                     file.getContentType()) &&
             s3Service.uploadFile(
-                    currentUserId,
+                    currentUser.getId(),
                     file.getOriginalFilename(),
                     file.getInputStream(),
                     file.getSize())

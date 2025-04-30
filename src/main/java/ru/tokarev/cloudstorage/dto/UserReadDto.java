@@ -12,5 +12,5 @@ public class UserReadDto {
     String username;
     String login;
     Role role;
-    Bucket bucket;
+    BucketReadDto bucket;
 }

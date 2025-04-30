@@ -43,14 +43,26 @@ public class FolderServiceTest {
 
         assertEquals(folder.get().getId(), folderById.getId());
     }
+//
+//    @Test
+//    void getListOfFilesAndFoldersInFolder() {
+//        Folder folderById = folderService.getFolderById(2L);
+//
+//        Map<Long, String> listInCurrentFolder = folderService.getListInCurrentFolder(folderById);
+//
+//        assertEquals(2, listInCurrentFolder.size());
+//
+//    }
 
     @Test
-    void getListOfFilesAndFoldersInFolder() {
-        Folder folderById = folderService.getFolderById(2L);
+    void getFolderByPathAndBucket() {
 
-        Map<Long, String> listInCurrentFolder = folderService.getListInCurrentFolder(folderById);
+        Optional<Bucket> bucketByName = bucketService.getBucketById(2L);
+        String folderPath = "/";
 
-        assertEquals(2, listInCurrentFolder.size());
+        Folder folderByPathAndBucket = folderService.getFolderByPathAndBucket(folderPath, bucketByName.get());
+
+        assertEquals(8, folderByPathAndBucket.getId());
 
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestConstructor;
 import ru.tokarev.cloudstorage.TestCloudStorateApplication;
 import ru.tokarev.cloudstorage.database.entity.Role;
+import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
 import ru.tokarev.cloudstorage.dto.UserReadDto;
 import ru.tokarev.cloudstorage.mapper.UserReadMapper;
@@ -38,9 +39,9 @@ public class UserServiceTest {
                 null
         );
 
-        UserReadDto createdUser = userService.create(preparedUser);
-        Optional<UserReadDto> DbUser = userService.findById(createdUser.getId()).map(userReadMapper::map);
-        Assertions.assertEquals(createdUser.getUsername(), DbUser.get().getUsername());
+        Optional<User> createdUser = userService.create(preparedUser);
+        Optional<UserReadDto> DbUser = userService.findById(createdUser.get().getId()).map(userReadMapper::map);
+        Assertions.assertEquals(createdUser.get().getUsername(), DbUser.get().getUsername());
 
 
     }

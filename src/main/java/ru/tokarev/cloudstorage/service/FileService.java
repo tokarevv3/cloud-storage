@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.tokarev.cloudstorage.database.entity.File;
 import ru.tokarev.cloudstorage.database.entity.Folder;
 import ru.tokarev.cloudstorage.database.entity.Type;
+import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.database.repositorty.FileRepository;
 
 import java.io.InputStream;
@@ -19,6 +20,8 @@ public class FileService {
 
     private final FileRepository fileRepository;
     private final FolderService folderService;
+    private final UserService userService;
+    private final LoginService loginService;
 
 
     public List<File> getFilesInFolder(Folder folder) {
@@ -32,7 +35,9 @@ public class FileService {
     //TODO: pure SQL method, disctruct to s3service upload method
     public boolean uploadFile(String fileName, String filePath, long size, String contentType) {
 
-        Folder folder = folderService.getFolderByPath(filePath);
+        User authenticatedUser = loginService.getAuthenticatedUser();
+
+        Folder folder = folderService.getFolderByPathAndBucket(filePath, authenticatedUser.getBucket());
 
         File file = File.builder()
                 .fileName(fileName)

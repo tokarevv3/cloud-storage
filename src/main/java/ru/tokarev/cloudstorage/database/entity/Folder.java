@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
+@ToString(exclude = "child")
 public class Folder {
 
     @Id
@@ -32,10 +32,10 @@ public class Folder {
     @JoinColumn(name="parent_id")
     private Folder parent;
 
-    @OneToMany(mappedBy = "parent")
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     private List<Folder> child = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @Nullable
     private Bucket bucketId;
 

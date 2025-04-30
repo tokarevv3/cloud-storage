@@ -64,7 +64,7 @@ public class S3Service {
         try {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
-                    .object(filePathName)
+                    .object("root-folder/" + filePathName)
                     .stream(inputStream, size, -1)
                     .build());
             return true;

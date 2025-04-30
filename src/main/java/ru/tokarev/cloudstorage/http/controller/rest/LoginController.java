@@ -12,6 +12,7 @@ import ru.tokarev.cloudstorage.dto.JwtResponse;
 import ru.tokarev.cloudstorage.dto.LoginRequest;
 import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
 import ru.tokarev.cloudstorage.provider.JwtTokenProvider;
+import ru.tokarev.cloudstorage.service.LoginService;
 import ru.tokarev.cloudstorage.service.UserService;
 
 /**
@@ -29,7 +30,7 @@ public class LoginController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
-    private final UserService userService;
+    private final LoginService loginService;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
@@ -60,7 +61,7 @@ public class LoginController {
         log.info("Registering user with login: " + userDto.getUsername());
 
         try {
-            userService.create(userDto);
+            loginService.registerUser(userDto);
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(

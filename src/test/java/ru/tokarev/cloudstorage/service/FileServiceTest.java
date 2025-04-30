@@ -33,11 +33,6 @@ public class FileServiceTest {
 
     private final String defaultBucketName = "base-bucket";
 
-    @Test
-    void buckerExist() {
-        boolean bucketExists = bucketService.isBucketExists(1L);
-        assertTrue(bucketExists);
-    }
 
     @Test
     void checkBucketInfo() {
@@ -50,7 +45,7 @@ public class FileServiceTest {
     void checkBucketList() {
         var buckets = bucketService.getBucketsList();
         for (var bucket : buckets) {
-            System.out.println(bucket.name());
+            System.out.println(bucket.getName());
         }
         assertTrue(true);
     }
@@ -97,15 +92,6 @@ public class FileServiceTest {
 //        }
 //    }
 
-    @Test
-    @SneakyThrows
-    void getFilesList() {
-        Iterable<Result<Item>> test = fileService.getFilesList(defaultBucketName, "test/кормёжка");
-
-        for (var result : test) {
-            System.out.println(result.get().objectName());
-        }
-    }
 
     @Test
     @SneakyThrows
