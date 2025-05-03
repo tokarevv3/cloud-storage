@@ -17,9 +17,6 @@ import java.util.Optional;
 public class FileService {
 
     private final FileRepository fileRepository;
-    private final FolderService folderService;
-    private final UserService userService;
-    private final LoginService loginService;
 
 
     public List<File> getFilesInFolder(Folder folder) {
@@ -56,5 +53,9 @@ public class FileService {
             path = path + '/';
         }
         return path;
+    }
+
+    public void deleteFile(Long id) {
+        fileRepository.deleteById(id);
     }
 }

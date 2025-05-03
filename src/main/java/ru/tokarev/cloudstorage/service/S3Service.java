@@ -1,15 +1,14 @@
 package ru.tokarev.cloudstorage.service;
 
-import io.minio.GetObjectArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
+import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.messages.Bucket;
+import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.tokarev.cloudstorage.database.entity.Folder;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -175,4 +174,45 @@ public class S3Service {
             return null;
         }
     }
+
+    public boolean deleteFolder(Folder deleteFolder) {
+        String deleteFolderBucketName = deleteFolder.getBucketId().getName();
+        String deleteFolderFullPath = deleteFolder.getPath() + deleteFolder.getName() + "/";
+        log.info("Trying to delete folder: " + deleteFolderFullPath);
+
+        try {
+            // Удаляем все объекты в папке и её подкаталогах рекурсивно
+            deleteObjectInFolder(deleteFolderBucketName, deleteFolderFullPath);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void deleteObjectInFolder(String bucketName, String prefix) {
+
+        if (prefix.startsWith("/")) {
+            prefix = prefix.substring(1);
+        }
+        log.info("Trying to delete folder: " + prefix + " in bucket: " + bucketName);
+
+        try {
+            Iterable<Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder()
+                    .recursive(true)
+                    .bucket(bucketName)
+                    .prefix(prefix)
+                    .build());
+            for (Result<Item> result : results) {
+                minioClient.removeObject(RemoveObjectArgs.builder()
+                        .object(result.get().objectName())
+                        .bucket(bucketName)
+                        .build());
+            }
+            log.info("Deleted list of object");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -176,4 +176,28 @@ public class PreviewService {
         folderService.createFolder(folderName, parentFolder.getId());
          return folder;
     }
+
+    public Boolean deleteFile(Long fileId) {
+        User authenticatedUser = loginService.getAuthenticatedUser();
+
+        Long userBucketId = authenticatedUser.getBucket().getId();
+        Long fileBucketId = fileService.getFile(fileId).get().getFolder().getBucketId().getId();
+        if (userBucketId.equals(fileBucketId)) {
+            fileService.deleteFile(fileId);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public Boolean deleteFolder(Long folderId) {
+        Long userBucketId = loginService.getAuthenticatedUser().getBucket().getId();
+        Folder folderById = folderService.getFolderById(folderId);
+        Long folderBucketId = folderById.getBucketId().getId();
+        if (userBucketId.equals(folderBucketId)) {
+            return folderService.deleteFolderById(folderId);
+        } else {
+            return false;
+        }
+    }
 }

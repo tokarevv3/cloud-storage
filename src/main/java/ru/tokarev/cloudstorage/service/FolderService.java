@@ -2,6 +2,7 @@ package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import ru.tokarev.cloudstorage.database.entity.Bucket;
 import ru.tokarev.cloudstorage.database.entity.Folder;
@@ -24,6 +25,7 @@ public class FolderService {
     private final FolderCreateEditMapper folderCreateEditMapper;
     private final FolderReadMapper folderReadMapper;
     private final S3Service s3Service;
+    private final FileService fileService;
 
     public Optional<FolderReadDto> createFolder(String folderName, Long folderId) {
         Folder parentFolder = folderRepository.getFolderById(folderId);
@@ -98,6 +100,25 @@ public class FolderService {
 
     public Folder getFolderById(Long id) {
         return folderRepository.getFolderById(id);
+    }
+
+    public boolean deleteFolderById(Long id) {
+        Optional<Folder> deleteFolder = folderRepository.findById(id);
+        deleteFolder.ifPresent(
+                this::deleteFolderRecursive);
+        return s3Service.deleteFolder(deleteFolder.get());
+    }
+
+    private void deleteFolderRecursive(@NotNull Folder folder) {
+
+        fileService.getFilesInFolder(folder)
+                .forEach(file -> fileService.deleteFile(file.getId()));
+
+        folderRepository.getAllFoldersByParentId(folder)
+                .forEach(this::deleteFolderRecursive);
+
+        folderRepository.delete(folder);
+
     }
 
 

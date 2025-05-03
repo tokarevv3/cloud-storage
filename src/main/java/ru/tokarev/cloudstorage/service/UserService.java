@@ -81,7 +81,6 @@ public class UserService implements UserDetailsService {
     }
 
     public Optional<User> findByUsername(String username) {
-        log.info("Call of method findByUsername");
         return userRepository.findByUsername(username);
     }
 }

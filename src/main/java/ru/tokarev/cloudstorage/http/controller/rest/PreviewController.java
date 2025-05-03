@@ -26,6 +26,7 @@ public class PreviewController {
                                                       @RequestParam(required = false) Long downloadFileId) {
 
         String folderPath = getPath(request);
+        log.info("Trying to get to folder with path {}", folderPath);
 
         if (fileId != null) {
             return ResponseEntity.ok(previewService.getFile(fileId));
@@ -50,6 +51,20 @@ public class PreviewController {
         }
     }
 
+    @DeleteMapping("/**")
+    public ResponseEntity<?> deleteFileFromFolder(HttpServletRequest request,
+                                                  @RequestParam(required = false) Long fileId,
+                                                  @RequestParam(required = false) Long folderId) {
+
+        if (fileId != null) {
+            return ResponseEntity.ok(previewService.deleteFile(fileId));
+        } else if (folderId != null) {
+            return ResponseEntity.ok(previewService.deleteFolder(folderId));
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 
     private String getPath(HttpServletRequest request) {
 
@@ -57,7 +72,6 @@ public class PreviewController {
 
         try {
             folderPath = java.net.URLDecoder.decode(request.getRequestURI().split("api")[1], StandardCharsets.UTF_8);
-            log.info(folderPath);
         } catch (Exception e) {
             folderPath = "";
         }
