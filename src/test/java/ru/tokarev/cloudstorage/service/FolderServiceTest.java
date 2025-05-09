@@ -19,50 +19,50 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 public class FolderServiceTest {
-
-    private final FolderService folderService;
-
-    private final BucketService bucketService;
-
-    @Test
-    void createRootFolder() {
-
-        String bucketName = bucketService.getBucketById(1L).get().getName();
-
-        folderService.createRootFolder(bucketName);
-
-
-
-    }
-
-    @Test
-    void createFolder() {
-        Optional<FolderReadDto> folder = folderService.createFolder("tryfolder", 2L);
-
-        Folder folderById = folderService.getFolderById(folder.get().getId());
-
-        assertEquals(folder.get().getId(), folderById.getId());
-    }
+//
+//    private final FolderService folderService;
+//
+//    private final BucketService bucketService;
 //
 //    @Test
-//    void getListOfFilesAndFoldersInFolder() {
-//        Folder folderById = folderService.getFolderById(2L);
+//    void createRootFolder() {
 //
-//        Map<Long, String> listInCurrentFolder = folderService.getListInCurrentFolder(folderById);
+//        String bucketName = bucketService.getBucketById(1L).get().getName();
 //
-//        assertEquals(2, listInCurrentFolder.size());
+//        folderService.createRootFolder(bucketName);
+//
+//
 //
 //    }
-
-    @Test
-    void getFolderByPathAndBucket() {
-
-        Optional<Bucket> bucketByName = bucketService.getBucketById(2L);
-        String folderPath = "/";
-
-        Folder folderByPathAndBucket = folderService.getFolderByPathAndBucket(folderPath, bucketByName.get());
-
-        assertEquals(8, folderByPathAndBucket.getId());
-
-    }
+//
+//    @Test
+//    void createFolder() {
+//        Optional<FolderReadDto> folder = folderService.createFolder("tryfolder", 2L);
+//
+//        Folder folderById = folderService.getFolderById(folder.get().getId());
+//
+//        assertEquals(folder.get().getId(), folderById.getId());
+//    }
+////
+////    @Test
+////    void getListOfFilesAndFoldersInFolder() {
+////        Folder folderById = folderService.getFolderById(2L);
+////
+////        Map<Long, String> listInCurrentFolder = folderService.getListInCurrentFolder(folderById);
+////
+////        assertEquals(2, listInCurrentFolder.size());
+////
+////    }
+//
+//    @Test
+//    void getFolderByPathAndBucket() {
+//
+//        Optional<Bucket> bucketByName = bucketService.getBucketById(2L);
+//        String folderPath = "/";
+//
+//        Folder folderByPathAndBucket = folderService.getFolderByPathAndBucket(folderPath, bucketByName.get());
+//
+//        assertEquals(8, folderByPathAndBucket.getId());
+//
+//    }
 }

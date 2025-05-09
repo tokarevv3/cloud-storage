@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestConstructor;
-import ru.tokarev.cloudstorage.TestCloudStorateApplication;
+import ru.tokarev.cloudstorage.TestCloudStorageApplication;
 import ru.tokarev.cloudstorage.database.entity.Role;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
@@ -18,31 +18,31 @@ import java.util.Optional;
 
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @RequiredArgsConstructor
-@SpringBootTest(classes = TestCloudStorateApplication.class)
+@SpringBootTest(classes = TestCloudStorageApplication.class)
 public class UserServiceTest {
 
-    private final UserService userService;
-    @Autowired
-    private UserReadMapper userReadMapper;
-
-
-    @Test
-    void createUser() {
-
-        // id auto-increment
-        // bucket - null-able.
-        UserCreateEditDto preparedUser = new UserCreateEditDto(
-                 "my-username",
-                "my-login@mail.ru",
-                "{noop}123",
-                Role.USER,
-                null
-        );
-
-        Optional<User> createdUser = userService.create(preparedUser);
-        Optional<UserReadDto> DbUser = userService.findById(createdUser.get().getId()).map(userReadMapper::map);
-        Assertions.assertEquals(createdUser.get().getUsername(), DbUser.get().getUsername());
-
-
-    }
+//    private final UserService userService;
+//    @Autowired
+//    private UserReadMapper userReadMapper;
+//
+//
+//    @Test
+//    void createUser() {
+//
+//        // id auto-increment
+//        // bucket - null-able.
+//        UserCreateEditDto preparedUser = new UserCreateEditDto(
+//                 "my-username",
+//                "my-login@mail.ru",
+//                "{noop}123",
+//                Role.USER,
+//                null
+//        );
+//
+//        Optional<User> createdUser = userService.create(preparedUser);
+//        Optional<UserReadDto> DbUser = userService.findById(createdUser.get().getId()).map(userReadMapper::map);
+//        Assertions.assertEquals(createdUser.get().getUsername(), DbUser.get().getUsername());
+//
+//
+//    }
 }

@@ -2,6 +2,7 @@ package ru.tokarev.cloudstorage.service;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.tokarev.cloudstorage.database.entity.*;
 import ru.tokarev.cloudstorage.database.repositorty.FileRepository;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FileService {
@@ -34,12 +36,16 @@ public class FileService {
         File file = File.builder()
                 .fileName(fileName)
                 .filePath(filePath)
-                .fileSize(String.valueOf(size))
+                .fileSize(String.valueOf(size)) // TODO:: to Long
                 .contentType(contentType)
                 .uploadedAt(LocalDateTime.now())
                 .fileType(Type.UNKNOWN)
                 .folder(parentFolder)
                 .build();
+
+        Bucket bucket = parentFolder.getBucketId();
+        bucket.updateSize(size);
+//        bucketService.saveBucket(bucket);
 
         fileRepository.saveAndFlush(file);
 
@@ -57,5 +63,9 @@ public class FileService {
 
     public void deleteFile(Long id) {
         fileRepository.deleteById(id);
+    }
+
+    public File saveFile(File file) {
+        return fileRepository.saveAndFlush(file);
     }
 }

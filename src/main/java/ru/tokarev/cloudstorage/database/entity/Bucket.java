@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "buckets")
 @Data
-@ToString(exclude = {"folders", "user"})
+@ToString(exclude = {"folders", "user", "rootFolder"})
 @EqualsAndHashCode(of = "name")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,4 +36,8 @@ public class Bucket {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="folder_id")
     private Folder rootFolder;
+
+    public void updateSize(Long size) {
+        this.size += size;
+    }
 }

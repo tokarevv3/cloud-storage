@@ -50,28 +50,11 @@ public class BucketService {
         if (s3Service.createBucket(bucketName)) {
             return bucketReadDto;
         }
-        return null;
+        return Optional.empty();
     }
 
     //TODO: maybe shall change to database?
     public Long getBucketSize(Long id) {
-//        String bucketName = defaultBucketName + id;
-//        Long totalSize = 0L;
-//
-//        var objects = minioClient.listObjects(ListObjectsArgs.builder()
-//                        .bucket(bucketName)
-//                        .recursive(true)
-//                        .build());
-//        for (var object : objects) {
-//            try {
-//                totalSize += object.get().size();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                return null;
-//            }
-//        }
-//        return totalSize;
-
         return bucketRepository.getSize(id);
     }
 

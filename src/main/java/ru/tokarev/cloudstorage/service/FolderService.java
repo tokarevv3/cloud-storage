@@ -4,16 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.tokarev.cloudstorage.database.entity.Bucket;
 import ru.tokarev.cloudstorage.database.entity.Folder;
+import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.database.repositorty.FolderRepository;
 import ru.tokarev.cloudstorage.dto.FolderCreateEditDto;
 import ru.tokarev.cloudstorage.dto.FolderReadDto;
+import ru.tokarev.cloudstorage.dto.FolderTreeNode;
 import ru.tokarev.cloudstorage.mapper.FolderCreateEditMapper;
 import ru.tokarev.cloudstorage.mapper.FolderReadMapper;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,6 +31,7 @@ public class FolderService {
     private final S3Service s3Service;
     private final FileService fileService;
 
+    @Transactional
     public Optional<FolderReadDto> createFolder(String folderName, Long folderId) {
         Folder parentFolder = folderRepository.getFolderById(folderId);
         String path = parentFolder.getPath() + parentFolder.getName() + "/";
@@ -55,9 +60,8 @@ public class FolderService {
         return Optional.empty();
     }
 
-    public Optional<Folder> createRootFolder(String bucketName) {
-
-        Bucket bucket = bucketService.getBucketByName(bucketName).get();
+    @Transactional
+    public Optional<Folder> createRootFolder(Bucket bucket) {
 
         Optional<Folder> createdFolder = Optional.of(Folder.builder()
                 .name("root-folder")
@@ -69,11 +73,12 @@ public class FolderService {
 
         bucket.setRootFolder(createdFolder.orElse(null));
 
+        folderRepository.saveAndFlush(createdFolder.orElse(null));
+
         bucketService.saveBucket(bucket);
 
-        if (s3Service.createRootFolder(bucketName)) {
-            return createdFolder
-                    .map(folderRepository::saveAndFlush);
+        if (s3Service.createRootFolder(bucket.getName())) {
+            return createdFolder;
         }
         return Optional.empty();
     }
@@ -102,6 +107,7 @@ public class FolderService {
         return folderRepository.getFolderById(id);
     }
 
+    @Transactional
     public boolean deleteFolderById(Long id) {
         Optional<Folder> deleteFolder = folderRepository.findById(id);
         deleteFolder.ifPresent(
@@ -121,5 +127,30 @@ public class FolderService {
 
     }
 
+    public List<FolderTreeNode> getUserFolderTree(Bucket userBucket) {;
 
+        List<Folder> userFolders = folderRepository.findByBucketId(userBucket);
+
+        Map<Long, List<Folder>> byParentId = userFolders.stream()
+                .collect(Collectors.groupingBy(f -> f.getParent() == null ? 0L : f.getParent().getId()));
+
+        return buildTree(0L, byParentId);
+    }
+
+    public List<FolderTreeNode> buildTree(Long parentId, Map<Long, List<Folder>> byParentId) {
+        List<FolderTreeNode> result = new ArrayList<>();
+        List<Folder> folders = byParentId.getOrDefault(parentId, Collections.emptyList());
+
+        for (Folder folder : folders) {
+            FolderTreeNode node = new FolderTreeNode(folder.getId(), folder.getName());
+            node.setChildren(buildTree(folder.getId(), byParentId));
+            result.add(node);
+        }
+
+        return result;
+    }
+
+    public Folder save(Folder folder) {
+        return folderRepository.saveAndFlush(folder);
+    }
 }

@@ -6,11 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.tokarev.cloudstorage.service.FileService;
 import ru.tokarev.cloudstorage.service.PreviewService;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -52,14 +50,26 @@ public class PreviewController {
     }
 
     @DeleteMapping("/**")
-    public ResponseEntity<?> deleteFileFromFolder(HttpServletRequest request,
-                                                  @RequestParam(required = false) Long fileId,
+    public ResponseEntity<?> deleteFileFromFolder(@RequestParam(required = false) Long fileId,
                                                   @RequestParam(required = false) Long folderId) {
 
         if (fileId != null) {
             return ResponseEntity.ok(previewService.deleteFile(fileId));
         } else if (folderId != null) {
             return ResponseEntity.ok(previewService.deleteFolder(folderId));
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PatchMapping("/**")
+    public ResponseEntity<?> moveFileOrFolder(@RequestParam(required = false) Long fileId,
+                                              @RequestParam(required = false) Long folderId,
+                                              @RequestParam Long newParentFolderId) {
+        if (fileId != null) {
+            return ResponseEntity.ok(previewService.moveFile(fileId, newParentFolderId));
+        } else if (folderId != null) {
+            return ResponseEntity.ok(previewService.moveFolder(folderId, newParentFolderId));
         } else {
             return ResponseEntity.badRequest().build();
         }

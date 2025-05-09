@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "child")
+@ToString(of = "bucketId")
 public class Folder {
 
     @Id
@@ -27,15 +27,16 @@ public class Folder {
 
     private LocalDateTime uploadedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Nullable
     @JoinColumn(name="parent_id")
     private Folder parent;
 
-    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @Builder.Default
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Folder> child = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Nullable
     private Bucket bucketId;
 

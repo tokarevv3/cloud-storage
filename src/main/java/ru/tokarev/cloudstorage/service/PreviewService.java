@@ -144,11 +144,13 @@ public class PreviewService {
     public MultipartFile downloadFile(Long fileId) {
         log.info("Trying to download file: " + fileId);
         Optional<File> file = fileService.getFile(fileId);
-        String fileName = "root-folder/" +  file.get().getFilePath()  + file.get().getFileName();
+        String fileName = file.get().getFilePath()  + file.get().getFileName();
+        fileName = fileName.substring(1);
         String bucket = file.get().getFolder().getBucketId().getName();
         return s3Service.downloadFile(bucket,fileName);
     }
 
+    //TODO:: add logic to check if folder with that name already exist
     public FolderCreateEditDto createFolder(String folderName, String folderPath) {
 
         Bucket userBucket = loginService.getAuthenticatedUser().getBucket();
@@ -198,6 +200,50 @@ public class PreviewService {
             return folderService.deleteFolderById(folderId);
         } else {
             return false;
+        }
+    }
+
+    public File moveFile(Long fileId, Long newParentFolderId) {
+
+        log.info("Trying to move file {}", fileId);
+
+        Long currentUserBucketId = loginService.getAuthenticatedUser().getBucket().getId();
+        Optional<File> movingFile = fileService.getFile(fileId);
+        Folder newParentFolder = folderService.getFolderById(newParentFolderId);
+
+
+        if (currentUserBucketId.equals(movingFile.get().getFolder().getBucketId().getId()) && (currentUserBucketId.equals(newParentFolder.getBucketId().getId()))) {
+
+            movingFile.get().setFolder(newParentFolder);
+            movingFile.get().setFilePath(newParentFolder.getPath() + newParentFolder.getName() + "/");
+
+
+            return fileService.saveFile(movingFile.get());
+
+        } else {
+            log.info("Failed to move file");
+            return null;
+        }
+    }
+
+    public Folder moveFolder(Long folderId, Long newParentFolderId) {
+
+        Long currentUserBucketId = loginService.getAuthenticatedUser().getBucket().getId();
+
+        Folder movingFolder = folderService.getFolderById(folderId);
+
+        Folder newParentFolder = folderService.getFolderById(newParentFolderId);
+
+        if (currentUserBucketId.equals(movingFolder.getBucketId().getId()) && (currentUserBucketId.equals(newParentFolder.getBucketId().getId()))) {
+
+            movingFolder.setParent(newParentFolder);
+            movingFolder.setPath(newParentFolder.getPath() + newParentFolder.getName() + "/");
+
+            return folderService.save(movingFolder);
+
+        } else {
+
+            return null;
         }
     }
 }

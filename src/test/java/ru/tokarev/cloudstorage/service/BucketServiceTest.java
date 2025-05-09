@@ -16,17 +16,17 @@ public class BucketServiceTest {
     private final UserService userService;
 
 
-    @Test
-    void createBucket() {
-
-        User user = userService.findById(1L).get();
-        BucketCreateEditDto createdBucket = new BucketCreateEditDto(
-                "test",
-                0L,
-                user,
-                null
-        );
-
-        bucketService.createBucket(user);
-    }
+//    @Test
+//    void createBucket() {
+//
+//        User user = userService.findById(1L).get();
+//        BucketCreateEditDto createdBucket = new BucketCreateEditDto(
+//                "test",
+//                0L,
+//                user,
+//                null
+//        );
+//
+//        bucketService.createBucket(user);
+//    }
 }

@@ -23,6 +23,7 @@ public class S3Service {
     private final MinioClient minioClient;
     private final String defaultBucketName = "user-bucket-";
 
+    @Deprecated
     public boolean createBucket(Long id) {
 
         String bucketName = defaultBucketName + id;

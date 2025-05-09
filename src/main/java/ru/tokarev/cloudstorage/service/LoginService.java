@@ -34,7 +34,7 @@ public class LoginService {
         createdBucket.ifPresent(bucket -> log.info("Successfully created bucket with id: " + bucket.getId()));
 
         log.info("Creating root folder for bucket: " + createdBucket.get().getName());
-        Optional<Folder> createdRootFolder = folderService.createRootFolder(createdBucket.get().getName());
+        Optional<Folder> createdRootFolder = folderService.createRootFolder(createdBucket.get());
         createdRootFolder.ifPresent(folder -> log.info("Successfully created root folder with id: " + folder.getId()));
 
     }
