@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.tokarev.cloudstorage.database.entity.Bucket;
+import ru.tokarev.cloudstorage.database.entity.Folder;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.database.repositorty.BucketRepository;
 import ru.tokarev.cloudstorage.dto.BucketCreateEditDto;
@@ -80,4 +81,7 @@ public class BucketService {
         return Optional.of(bucketRepository.saveAndFlush(bucket));
     }
 
+    public boolean existsByFolder(Folder folder) {
+        return bucketRepository.existsByRootFolder(folder);
+    }
 }

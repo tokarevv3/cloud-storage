@@ -20,4 +20,6 @@ public interface BucketRepository extends JpaRepository<Bucket, Long> {
     Long getSize(Long id);
 
     Optional<Bucket> findByName(String name);
+
+    boolean existsByRootFolder(Folder rootFolder);
 }

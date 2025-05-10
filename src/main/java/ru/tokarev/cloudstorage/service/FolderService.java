@@ -6,8 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.tokarev.cloudstorage.database.entity.Bucket;
+import ru.tokarev.cloudstorage.database.entity.File;
 import ru.tokarev.cloudstorage.database.entity.Folder;
-import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.database.repositorty.FolderRepository;
 import ru.tokarev.cloudstorage.dto.FolderCreateEditDto;
 import ru.tokarev.cloudstorage.dto.FolderReadDto;
@@ -117,13 +117,22 @@ public class FolderService {
 
     private void deleteFolderRecursive(@NotNull Folder folder) {
 
+        if (bucketService.existsByFolder(folder)) {
+            log.warn("Skipping deletion of folder {} — linked to a bucket", folder.getId());
+            return;
+        }
+
         fileService.getFilesInFolder(folder)
                 .forEach(file -> fileService.deleteFile(file.getId()));
 
         folderRepository.getAllFoldersByParentId(folder)
                 .forEach(this::deleteFolderRecursive);
 
-        folderRepository.delete(folder);
+
+
+        log.warn("Trying to delete folder {}", folder.getId());
+        folderRepository.deleteById(folder.getId());
+        folderRepository.flush();
 
     }
 
@@ -152,5 +161,23 @@ public class FolderService {
 
     public Folder save(Folder folder) {
         return folderRepository.saveAndFlush(folder);
+    }
+
+    // TODO: recursive update folder`s path and it`s files and folders
+    public void updateFolderRecursive(Folder folder) {
+        String currentNewPath = folder.getPath() + folder.getName() + "/";
+        List<File> filesInFolder = fileService.getFilesInFolder(folder);
+        for (File file : filesInFolder) {
+            file.setFilePath(currentNewPath);
+            fileService.saveFile(file);
+        }
+
+        List<Folder> foldersInFolder = getFoldersInFolder(folder);
+
+        for (Folder folderInFolder : foldersInFolder) {
+            folderInFolder.setPath(currentNewPath);
+            updateFolderRecursive(folderInFolder);
+        }
+
     }
 }

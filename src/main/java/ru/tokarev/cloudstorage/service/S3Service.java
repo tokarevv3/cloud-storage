@@ -60,6 +60,7 @@ public class S3Service {
             return null;
         }
     }
+
     public boolean uploadFile(Long userId, String filePathName, InputStream inputStream, long size) {
 
         String bucketName = defaultBucketName + userId;
@@ -108,7 +109,6 @@ public class S3Service {
     }
 
 
-
     //TODO: remake
     public List<String> uploadFiles(List<MultipartFile> files, String folderPath) throws Exception {
 
@@ -139,7 +139,7 @@ public class S3Service {
         try {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
-                    .object( path + "/" + folderName+ "/confirmation")
+                    .object(path + "/" + folderName + "/confirmation")
                     .stream(new ByteArrayInputStream(new byte[0]), 0, 0)
                     .build());
             return true;
@@ -167,8 +167,8 @@ public class S3Service {
         try {
             log.info("Trying to download file: " + fileName);
             return (MultipartFile) minioClient.getObject(GetObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(fileName)
+                    .bucket(bucketName)
+                    .object(fileName)
                     .build());
         } catch (Exception e) {
             e.printStackTrace();
@@ -182,7 +182,6 @@ public class S3Service {
         log.info("Trying to delete folder: " + deleteFolderFullPath);
 
         try {
-            // Удаляем все объекты в папке и её подкаталогах рекурсивно
             deleteObjectInFolder(deleteFolderBucketName, deleteFolderFullPath);
             return true;
         } catch (Exception e) {
@@ -216,4 +215,67 @@ public class S3Service {
         }
     }
 
+    public void updateFilePath(String bucketName, String oldObjectPath, String newObjectPath) {
+        try {
+            minioClient.copyObject(CopyObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(newObjectPath)
+                    .source(CopySource.builder()
+                            .bucket(bucketName)
+                            .object(oldObjectPath)
+                            .build())
+                    .build());
+
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(oldObjectPath)
+                    .build());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+    }
+
+    public void updateFolderPath(String bucketName, String oldPath, String newPath) {
+
+        try {
+            Iterable<Result<Item>> results = minioClient.listObjects(
+                    ListObjectsArgs.builder()
+                            .bucket(bucketName)
+                            .prefix(oldPath)
+                            .recursive(true)
+                            .build()
+            );
+
+            for (Result<Item> result : results) {
+                Item item = result.get();
+                String oldObjectName = item.objectName();
+                String newObjectName = oldObjectName.replace(oldPath, newPath);
+                log.info("Trying to put: " + newObjectName);
+
+                minioClient.copyObject(
+                        CopyObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(newObjectName)
+                                .source(CopySource.builder()
+                                        .bucket(bucketName)
+                                        .object(oldObjectName)
+                                        .build())
+                                .build()
+                );
+
+                minioClient.removeObject(
+                        RemoveObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(oldObjectName)
+                                .build()
+                );
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update folder path: " + e.getMessage(), e);
+
+        }
+    }
 }

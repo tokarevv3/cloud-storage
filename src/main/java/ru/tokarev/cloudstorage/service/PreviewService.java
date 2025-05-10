@@ -2,8 +2,6 @@ package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.tokarev.cloudstorage.database.entity.Bucket;
@@ -138,7 +136,7 @@ public class PreviewService {
     public FileReadDto getFile(Long fileId) {
         return fileService.getFile(fileId)
                 .map(fileReadMapper::map)
-                .get();
+                .orElse(null);
     }
 
     public MultipartFile downloadFile(Long fileId) {
@@ -197,6 +195,7 @@ public class PreviewService {
         Folder folderById = folderService.getFolderById(folderId);
         Long folderBucketId = folderById.getBucketId().getId();
         if (userBucketId.equals(folderBucketId)) {
+            log.info("Trying to delete folder: " + folderId);
             return folderService.deleteFolderById(folderId);
         } else {
             return false;
@@ -204,46 +203,66 @@ public class PreviewService {
     }
 
     public File moveFile(Long fileId, Long newParentFolderId) {
-
         log.info("Trying to move file {}", fileId);
 
-        Long currentUserBucketId = loginService.getAuthenticatedUser().getBucket().getId();
-        Optional<File> movingFile = fileService.getFile(fileId);
-        Folder newParentFolder = folderService.getFolderById(newParentFolderId);
+        User user = loginService.getAuthenticatedUser();
+        Long userBucketId = user.getBucket().getId();
 
+        File file = fileService.getFile(fileId)
+                .orElseThrow(() -> new IllegalArgumentException("File not found"));
+        Folder newFolder = folderService.getFolderById(newParentFolderId);
 
-        if (currentUserBucketId.equals(movingFile.get().getFolder().getBucketId().getId()) && (currentUserBucketId.equals(newParentFolder.getBucketId().getId()))) {
+        Long fileBucketId = file.getFolder().getBucketId().getId();
+        Long newFolderBucketId = newFolder.getBucketId().getId();
 
-            movingFile.get().setFolder(newParentFolder);
-            movingFile.get().setFilePath(newParentFolder.getPath() + newParentFolder.getName() + "/");
-
-
-            return fileService.saveFile(movingFile.get());
-
-        } else {
-            log.info("Failed to move file");
+        if (!userBucketId.equals(fileBucketId) || !userBucketId.equals(newFolderBucketId)) {
+            log.info("Failed to move file — access denied or invalid bucket");
             return null;
         }
+
+        String oldPath = file.getFilePath().substring(1) + file.getFileName();
+        String newPath = newFolder.getPath().substring(1) + newFolder.getName() + "/" + file.getFileName();
+        String bucketName = file.getFolder().getBucketId().getName();
+
+        file.setFolder(newFolder);
+        file.setFilePath(newFolder.getPath() + newFolder.getName() + "/");
+
+        s3Service.updateFilePath(bucketName, oldPath, newPath);
+
+        return fileService.saveFile(file);
     }
 
+    @Deprecated
+    //TODO: Need update files in folder
     public Folder moveFolder(Long folderId, Long newParentFolderId) {
+        User user = loginService.getAuthenticatedUser();
+        Bucket userBucket = user.getBucket();
+        Long userBucketId = userBucket.getId();
+        String bucketName = userBucket.getName();
 
-        Long currentUserBucketId = loginService.getAuthenticatedUser().getBucket().getId();
+        Folder folder = folderService.getFolderById(folderId);
+        Folder newParent = folderService.getFolderById(newParentFolderId);
 
-        Folder movingFolder = folderService.getFolderById(folderId);
+        Long folderBucketId = folder.getBucketId().getId();
+        Long newParentBucketId = newParent.getBucketId().getId();
 
-        Folder newParentFolder = folderService.getFolderById(newParentFolderId);
-
-        if (currentUserBucketId.equals(movingFolder.getBucketId().getId()) && (currentUserBucketId.equals(newParentFolder.getBucketId().getId()))) {
-
-            movingFolder.setParent(newParentFolder);
-            movingFolder.setPath(newParentFolder.getPath() + newParentFolder.getName() + "/");
-
-            return folderService.save(movingFolder);
-
-        } else {
-
+        if (!userBucketId.equals(folderBucketId) || !userBucketId.equals(newParentBucketId)) {
+            log.info("Failed to move folder — access denied or invalid bucket");
             return null;
         }
+
+        String oldPath = folder.getPath().substring(1) + folder.getName() + "/";
+        String newPath = newParent.getPath().substring(1) + newParent.getName() + "/";
+
+        folder.setParent(newParent);
+        folder.setPath("/" + newPath);
+
+        folderService.updateFolderRecursive(folder);
+
+
+        s3Service.updateFolderPath(bucketName, oldPath, newPath + folder.getName() + "/");
+
+        return folderService.save(folder);
     }
+
 }
