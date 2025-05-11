@@ -21,7 +21,8 @@ public class PreviewController {
     @GetMapping("/**")
     public ResponseEntity<?> getListOfFilesAndFolders(HttpServletRequest request,
                                                       @RequestParam(required = false) Long fileId,
-                                                      @RequestParam(required = false) Long downloadFileId) {
+                                                      @RequestParam(required = false) Long downloadFileId,
+                                                      @RequestParam(required = false) Long previewFileId) {
 
         String folderPath = getPath(request);
         log.info("Trying to get to folder with path {}", folderPath);
@@ -30,6 +31,13 @@ public class PreviewController {
             return ResponseEntity.ok(previewService.getFile(fileId));
         } else if (downloadFileId != null) {
             return ResponseEntity.ok(previewService.downloadFile(downloadFileId));
+        } else if (previewFileId != null) {
+            try {
+                log.info("Trying to preview file with id {}", previewFileId);
+                return previewService.previewFile(previewFileId);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
         } else {
             return ResponseEntity.ok(previewService.getListOfFilesAndFoldersInFolder(folderPath));
         }

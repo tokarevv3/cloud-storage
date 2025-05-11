@@ -19,6 +19,7 @@ import java.util.Optional;
 public class FileService {
 
     private final FileRepository fileRepository;
+    private final BucketService bucketService;
 
 
     public List<File> getFilesInFolder(Folder folder) {
@@ -45,7 +46,7 @@ public class FileService {
 
         Bucket bucket = parentFolder.getBucketId();
         bucket.updateSize(size);
-//        bucketService.saveBucket(bucket);
+        bucketService.saveBucket(bucket);
 
         fileRepository.saveAndFlush(file);
 
@@ -62,6 +63,13 @@ public class FileService {
     }
 
     public void deleteFile(Long id) {
+
+        getFile(id).ifPresent(file -> {
+            Bucket bucket = file.getFolder().getBucketId();
+            String fileSize = file.getFileSize();
+            bucket.updateSize(-Long.parseLong(fileSize));
+        });
+
         fileRepository.deleteById(id);
     }
 

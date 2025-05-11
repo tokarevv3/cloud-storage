@@ -2,8 +2,13 @@ package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import ru.tokarev.cloudstorage.database.entity.Bucket;
 import ru.tokarev.cloudstorage.database.entity.File;
 import ru.tokarev.cloudstorage.database.entity.Folder;
@@ -145,7 +150,8 @@ public class PreviewService {
         String fileName = file.get().getFilePath()  + file.get().getFileName();
         fileName = fileName.substring(1);
         String bucket = file.get().getFolder().getBucketId().getName();
-        return s3Service.downloadFile(bucket,fileName);
+//        return s3Service.downloadFile(bucket,fileName);
+        return null;
     }
 
     //TODO:: add logic to check if folder with that name already exist
@@ -265,4 +271,19 @@ public class PreviewService {
         return folderService.save(folder);
     }
 
+    public ResponseEntity<byte[]> previewFile(Long previewFileId) throws IOException {
+        log.info("Trying to preview file with id: {}", previewFileId);
+        File file = fileService.getFile(previewFileId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Bucket fileBucket = file.getFolder().getBucketId();
+        String filePath = file.getFilePath().substring(1) + file.getFileName();
+        byte[] fileBytes = s3Service.downloadFile(fileBucket.getName(), filePath);
+
+        log.info(MediaType.parseMediaType(file.getContentType()).toString());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(file.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFileName() + "\"")
+                .body(fileBytes);
+
+    }
 }

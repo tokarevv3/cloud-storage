@@ -163,13 +163,22 @@ public class S3Service {
         }
     }
 
-    public MultipartFile downloadFile(String bucketName, String fileName) {
+    // TODO:: remake
+    public byte[] downloadFile(String bucketName, String fileName) {
         try {
             log.info("Trying to download file: " + fileName);
-            return (MultipartFile) minioClient.getObject(GetObjectArgs.builder()
+
+//            MultipartFile multipartFile;
+
+            return minioClient.getObject(GetObjectArgs.builder()
                     .bucket(bucketName)
                     .object(fileName)
-                    .build());
+                    .build()).readAllBytes();
+
+//            return minioClient.downloadObject(DownloadObjectArgs.builder()
+//                            .bucket(bucketName)
+//                            .object(fileName)
+//                    .build());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
