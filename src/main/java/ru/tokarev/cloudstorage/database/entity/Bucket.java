@@ -38,6 +38,7 @@ public class Bucket {
     private Folder rootFolder;
 
     public void updateSize(Long size) {
+
         this.size += size;
     }
 }

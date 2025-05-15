@@ -23,7 +23,6 @@ public class UserReadMapper implements Mapper<User, UserReadDto> {
                 obj.getId(),
                 obj.getUsername(),
                 obj.getLogin(),
-                obj.getRole(),
                 bucket);
     }
 

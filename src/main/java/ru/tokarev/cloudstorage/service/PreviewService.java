@@ -54,18 +54,12 @@ public class PreviewService {
             folderByPath = folderService.getFolderByNameAndPathAndBucket(folderName, folderPath, currentUser.getBucket());
         }
 
-
-
-//        Folder folderByPath = folderService.getFolderByPathAndBucket("/root-folder" + path, currentUser.getBucket());
-
         if (folderByPath == null) {
             log.info("Cannot find folder owner. Maybe path is wrong or belongs to other bucket?");
             return null;
         }
 
         log.info("Found folder owner of path: " + folderByPath);
-
-
 
         return Stream.concat(
                 folderService.getFoldersInFolder(folderByPath).stream(),
@@ -144,14 +138,13 @@ public class PreviewService {
                 .orElse(null);
     }
 
-    public MultipartFile downloadFile(Long fileId) {
+    public byte[] downloadFile(Long fileId) {
         log.info("Trying to download file: " + fileId);
         Optional<File> file = fileService.getFile(fileId);
         String fileName = file.get().getFilePath()  + file.get().getFileName();
         fileName = fileName.substring(1);
         String bucket = file.get().getFolder().getBucketId().getName();
-//        return s3Service.downloadFile(bucket,fileName);
-        return null;
+        return s3Service.downloadFile(bucket,fileName);
     }
 
     //TODO:: add logic to check if folder with that name already exist
@@ -233,12 +226,11 @@ public class PreviewService {
         file.setFolder(newFolder);
         file.setFilePath(newFolder.getPath() + newFolder.getName() + "/");
 
-        s3Service.updateFilePath(bucketName, oldPath, newPath);
+        s3Service.updateFile(bucketName, oldPath, newPath);
 
         return fileService.saveFile(file);
     }
 
-    @Deprecated
     //TODO: Need update files in folder
     public Folder moveFolder(Long folderId, Long newParentFolderId) {
         User user = loginService.getAuthenticatedUser();
@@ -271,7 +263,7 @@ public class PreviewService {
         return folderService.save(folder);
     }
 
-    public ResponseEntity<byte[]> previewFile(Long previewFileId) throws IOException {
+    public ResponseEntity<byte[]> getFileToClient(Long previewFileId) {
         log.info("Trying to preview file with id: {}", previewFileId);
         File file = fileService.getFile(previewFileId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         Bucket fileBucket = file.getFolder().getBucketId();
@@ -285,5 +277,38 @@ public class PreviewService {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFileName() + "\"")
                 .body(fileBytes);
 
+    }
+
+    public boolean renameFile(Long fileId, String newName) {
+        File file = fileService.getFile(fileId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+
+        String bucketName = file.getFolder().getBucketId().getName();
+
+        String fileOldFullPath = file.getFilePath().substring(1) + file.getFileName();
+
+        String fileNewFullPath = file.getFilePath().substring(1) + newName;
+
+        file.setFileName(newName);
+        fileService.saveFile(file);
+
+
+        return s3Service.updateFile(bucketName, fileOldFullPath, fileNewFullPath);
+    }
+
+    public boolean renameFolder(Long folderId, String newName) {
+        Folder folderById = folderService.getFolderById(folderId);
+        String bucketName = folderById.getBucketId().getName();
+        String folderPath = folderById.getPath().substring(1);
+        String oldPath = folderPath + folderById.getName() + "/";
+        String newPath = folderPath + newName + "/";
+
+        folderById.setName(newName);
+
+        folderService.save(folderById);
+
+        folderService.updateFolderRecursive(folderById);
+
+        return s3Service.updateFolderPath(bucketName, oldPath, newPath);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.tokarev.cloudstorage.database.entity.*;
 import ru.tokarev.cloudstorage.database.repositorty.FileRepository;
 import ru.tokarev.cloudstorage.dto.FileReadDto;
+import ru.tokarev.cloudstorage.exception.BucketSizeExceededException;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -45,12 +46,14 @@ public class FileService {
                 .build();
 
         Bucket bucket = parentFolder.getBucketId();
-        bucket.updateSize(size);
-        bucketService.saveBucket(bucket);
+        try {
+            bucketService.updateBucketSize(bucket, size);
+            fileRepository.saveAndFlush(file);
+            return true;
+        } catch (BucketSizeExceededException e) {
+            return false;
+        }
 
-        fileRepository.saveAndFlush(file);
-
-        return true;
     }
 
 

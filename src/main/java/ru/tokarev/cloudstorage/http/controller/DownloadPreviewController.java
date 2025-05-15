@@ -30,7 +30,7 @@ public class DownloadPreviewController {
 
 
     @GetMapping("/preview")
-    public ResponseEntity<byte[]> previewFile(@RequestParam Long previewFileId) throws IOException {
+    public ResponseEntity<byte[]> previewFile(@RequestParam Long previewFileId) {
         log.info("Trying to preview file with id: {}", previewFileId);
         File file = fileService.getFile(previewFileId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         Bucket fileBucket = file.getFolder().getBucketId();

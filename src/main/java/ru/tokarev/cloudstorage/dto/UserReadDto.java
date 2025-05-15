@@ -11,6 +11,5 @@ public class UserReadDto {
     Long id;
     String username;
     String login;
-    Role role;
     BucketReadDto bucket;
 }

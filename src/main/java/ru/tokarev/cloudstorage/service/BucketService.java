@@ -1,6 +1,7 @@
 package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.tokarev.cloudstorage.database.entity.Bucket;
@@ -8,6 +9,9 @@ import ru.tokarev.cloudstorage.database.entity.Folder;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.database.repositorty.BucketRepository;
 import ru.tokarev.cloudstorage.dto.BucketCreateEditDto;
+import ru.tokarev.cloudstorage.dto.BucketReadDto;
+import ru.tokarev.cloudstorage.dto.UserReadDto;
+import ru.tokarev.cloudstorage.exception.BucketSizeExceededException;
 import ru.tokarev.cloudstorage.mapper.BucketCreateEditMapper;
 import ru.tokarev.cloudstorage.mapper.BucketReadMapper;
 
@@ -29,6 +33,9 @@ public class BucketService {
     private final BucketCreateEditMapper bucketCreateEditMapper;
     private final BucketReadMapper bucketReadMapper;
     private final String defaultBucketName = "user-bucket-";
+
+    @Value("${minio.user.capacity}")
+    private Long maxBucketSize;
 
     // What it really should to return? boolean or DTO?
     public Optional<Bucket> createBucket( User user) {
@@ -54,20 +61,6 @@ public class BucketService {
         return Optional.empty();
     }
 
-    //TODO: maybe shall change to database?
-    public Long getBucketSize(Long id) {
-        return bucketRepository.getSize(id);
-    }
-
-    // TODO: create repository method
-    public List<Bucket> getBucketsList() {
-        return bucketRepository.findAll()
-//                .stream()
-//                .map(bucketReadMapper::map)
-//                .collect(toList())
-                ;
-    }
-
     //TODO:: create normal getBucket method
     public Optional<Bucket> getBucketByName(String bucketName) {
         return bucketRepository.findByName(bucketName);
@@ -83,5 +76,20 @@ public class BucketService {
 
     public boolean existsByFolder(Folder folder) {
         return bucketRepository.existsByRootFolder(folder);
+    }
+
+    public void updateBucketSize(Bucket bucket, long size) throws BucketSizeExceededException {
+        if (bucket.getSize() + size > maxBucketSize) {
+            throw new BucketSizeExceededException("Bucket size exceeded over limit.");
+        } else {
+            bucket.setSize(bucket.getSize() + size);
+            bucketRepository.saveAndFlush(bucket);
+        }
+    }
+
+    public List<BucketReadDto> findAll() {
+        return bucketRepository.findAll().stream()
+                .map(bucketReadMapper::map)
+                .toList();
     }
 }

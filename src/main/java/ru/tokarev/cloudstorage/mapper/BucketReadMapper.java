@@ -9,8 +9,10 @@ public class BucketReadMapper implements Mapper<Bucket, BucketReadDto> {
     @Override
     public BucketReadDto map(Bucket obj) {
         return new BucketReadDto(
+                obj.getId(),
                 obj.getName(),
-                obj.getSize()
+                obj.getSize(),
+                obj.getUser().getId()
         );
     }
 }

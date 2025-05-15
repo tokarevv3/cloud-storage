@@ -163,7 +163,6 @@ public class FolderService {
         return folderRepository.saveAndFlush(folder);
     }
 
-    // TODO: recursive update folder`s path and it`s files and folders
     public void updateFolderRecursive(Folder folder) {
         String currentNewPath = folder.getPath() + folder.getName() + "/";
         List<File> filesInFolder = fileService.getFilesInFolder(folder);

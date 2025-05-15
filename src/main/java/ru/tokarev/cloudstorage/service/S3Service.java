@@ -167,18 +167,11 @@ public class S3Service {
     public byte[] downloadFile(String bucketName, String fileName) {
         try {
             log.info("Trying to download file: " + fileName);
-
-//            MultipartFile multipartFile;
-
             return minioClient.getObject(GetObjectArgs.builder()
                     .bucket(bucketName)
                     .object(fileName)
                     .build()).readAllBytes();
 
-//            return minioClient.downloadObject(DownloadObjectArgs.builder()
-//                            .bucket(bucketName)
-//                            .object(fileName)
-//                    .build());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -224,7 +217,7 @@ public class S3Service {
         }
     }
 
-    public void updateFilePath(String bucketName, String oldObjectPath, String newObjectPath) {
+    public boolean updateFile(String bucketName, String oldObjectPath, String newObjectPath) {
         try {
             minioClient.copyObject(CopyObjectArgs.builder()
                     .bucket(bucketName)
@@ -240,13 +233,15 @@ public class S3Service {
                     .object(oldObjectPath)
                     .build());
 
+            return true;
+
         } catch (Exception e) {
             e.printStackTrace();
-
+            return false;
         }
     }
 
-    public void updateFolderPath(String bucketName, String oldPath, String newPath) {
+    public boolean updateFolderPath(String bucketName, String oldPath, String newPath) {
 
         try {
             Iterable<Result<Item>> results = minioClient.listObjects(
@@ -282,9 +277,10 @@ public class S3Service {
                 );
             }
 
+            return true;
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to update folder path: " + e.getMessage(), e);
-
         }
     }
 }
