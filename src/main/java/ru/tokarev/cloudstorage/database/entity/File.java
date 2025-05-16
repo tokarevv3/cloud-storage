@@ -31,8 +31,6 @@ public class File {
 
     private LocalDateTime uploadedAt;
 
-    private Type fileType;
-
     private String contentType;
 
     private String fileSize;

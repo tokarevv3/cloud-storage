@@ -15,8 +15,12 @@ import ru.tokarev.cloudstorage.database.entity.Folder;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.dto.FileReadDto;
 import ru.tokarev.cloudstorage.dto.FolderCreateEditDto;
+import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
+import ru.tokarev.cloudstorage.dto.UserReadDto;
 import ru.tokarev.cloudstorage.mapper.FileReadMapper;
+import ru.tokarev.cloudstorage.mapper.FolderReadMapper;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -34,6 +38,8 @@ public class PreviewService {
     private final S3Service s3Service;
     private final FileReadMapper fileReadMapper;
     private final LoginService loginService;
+    private final FolderReadMapper folderReadMapper;
+    private final UserService userService;
 
     public Map<Long, String> getListOfFilesAndFoldersInFolder(String path) {
 
@@ -172,26 +178,34 @@ public class PreviewService {
         log.info(String.valueOf(folder));
 
         log.info("Folder created: " + folder);
-        folderService.createFolder(folderName, parentFolder.getId());
+        try {
+            folderService.createFolder(folderName, parentFolder.getId());
+        } catch (FileNotFoundException e) {
+            return null;
+        }
          return folder;
     }
 
-    public Boolean deleteFile(Long fileId) {
+    public Boolean deleteFile(Long fileId) throws FileNotFoundException {
         User authenticatedUser = loginService.getAuthenticatedUser();
 
-        Long userBucketId = authenticatedUser.getBucket().getId();
-        Long fileBucketId = fileService.getFile(fileId).get().getFolder().getBucketId().getId();
-        if (userBucketId.equals(fileBucketId)) {
+        Bucket userBucket = authenticatedUser.getBucket();
+        File deleteFile = fileService.getFile(fileId).orElseThrow(FileNotFoundException::new);
+        Bucket deleteFileBucket = deleteFile.getFolder().getBucketId();
+
+        if (userBucket.getId().equals(deleteFileBucket.getId())) {
             fileService.deleteFile(fileId);
+            String fileFullPath = deleteFile.getFilePath() + deleteFile.getFileName();
+            s3Service.deleteFile(deleteFileBucket.getName(), fileFullPath);
             return true;
         } else {
             return false;
         }
     }
 
-    public Boolean deleteFolder(Long folderId) {
+    public Boolean deleteFolder(Long folderId) throws FileNotFoundException {
         Long userBucketId = loginService.getAuthenticatedUser().getBucket().getId();
-        Folder folderById = folderService.getFolderById(folderId);
+        Folder folderById = folderService.getFolderById(folderId).orElseThrow(FileNotFoundException::new);
         Long folderBucketId = folderById.getBucketId().getId();
         if (userBucketId.equals(folderBucketId)) {
             log.info("Trying to delete folder: " + folderId);
@@ -209,7 +223,7 @@ public class PreviewService {
 
         File file = fileService.getFile(fileId)
                 .orElseThrow(() -> new IllegalArgumentException("File not found"));
-        Folder newFolder = folderService.getFolderById(newParentFolderId);
+        Folder newFolder = folderService.getFolderById(newParentFolderId).orElseThrow(IllegalArgumentException::new);
 
         Long fileBucketId = file.getFolder().getBucketId().getId();
         Long newFolderBucketId = newFolder.getBucketId().getId();
@@ -232,14 +246,14 @@ public class PreviewService {
     }
 
     //TODO: Need update files in folder
-    public Folder moveFolder(Long folderId, Long newParentFolderId) {
+    public Folder moveFolder(Long folderId, Long newParentFolderId) throws FileNotFoundException {
         User user = loginService.getAuthenticatedUser();
         Bucket userBucket = user.getBucket();
         Long userBucketId = userBucket.getId();
         String bucketName = userBucket.getName();
 
-        Folder folder = folderService.getFolderById(folderId);
-        Folder newParent = folderService.getFolderById(newParentFolderId);
+        Folder folder = folderService.getFolderById(folderId).orElseThrow(FileNotFoundException::new);
+        Folder newParent = folderService.getFolderById(newParentFolderId).orElseThrow(IllegalArgumentException::new);
 
         Long folderBucketId = folder.getBucketId().getId();
         Long newParentBucketId = newParent.getBucketId().getId();
@@ -280,24 +294,39 @@ public class PreviewService {
     }
 
     public boolean renameFile(Long fileId, String newName) {
-        File file = fileService.getFile(fileId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
+        File file = fileService.getFile(fileId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         String bucketName = file.getFolder().getBucketId().getName();
+        String oldFileName = file.getFileName();
+        String oldExtension = getFileExtension(oldFileName);
 
-        String fileOldFullPath = file.getFilePath().substring(1) + file.getFileName();
+        String baseNewName = newName;
+        String newExtension = getFileExtension(newName);
 
-        String fileNewFullPath = file.getFilePath().substring(1) + newName;
+        if (newExtension.isEmpty()) {
+            baseNewName = newName + oldExtension;
+        } else if (!newExtension.equalsIgnoreCase(oldExtension)) {
+            baseNewName = newName.substring(0, newName.lastIndexOf('.')) + oldExtension;
+        }
 
-        file.setFileName(newName);
+        String fileOldFullPath = file.getFilePath().substring(1) + oldFileName;
+        String fileNewFullPath = file.getFilePath().substring(1) + baseNewName;
+
+        file.setFileName(baseNewName);
         fileService.saveFile(file);
-
 
         return s3Service.updateFile(bucketName, fileOldFullPath, fileNewFullPath);
     }
 
-    public boolean renameFolder(Long folderId, String newName) {
-        Folder folderById = folderService.getFolderById(folderId);
+    private String getFileExtension(String filename) {
+        int dotIndex = filename.lastIndexOf('.');
+        return (dotIndex != -1) ? filename.substring(dotIndex) : "";
+    }
+
+
+    public boolean renameFolder(Long folderId, String newName) throws FileNotFoundException {
+        Folder folderById = folderService.getFolderById(folderId).orElseThrow(FileNotFoundException::new);
         String bucketName = folderById.getBucketId().getName();
         String folderPath = folderById.getPath().substring(1);
         String oldPath = folderPath + folderById.getName() + "/";
@@ -310,5 +339,11 @@ public class PreviewService {
         folderService.updateFolderRecursive(folderById);
 
         return s3Service.updateFolderPath(bucketName, oldPath, newPath);
+    }
+
+    public Object getFolder(Long folderId) {
+        return folderService.getFolderById(folderId)
+                .map(folderReadMapper::map)
+                .orElse(null);
     }
 }

@@ -217,6 +217,18 @@ public class S3Service {
         }
     }
 
+    public boolean deleteFile(String bucketName, String fileFullPath) {
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fileFullPath)
+                    .build());
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public boolean updateFile(String bucketName, String oldObjectPath, String newObjectPath) {
         try {
             minioClient.copyObject(CopyObjectArgs.builder()

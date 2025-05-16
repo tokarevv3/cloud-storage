@@ -12,9 +12,7 @@ public class FolderReadMapper implements Mapper<Folder, FolderReadDto> {
                 obj.getId(),
                 obj.getName(),
                 obj.getPath(),
-                obj.getUploadedAt(),
-                obj.getParent(),
-                obj.getBucketId()
+                obj.getUploadedAt()
         );
     }
 }

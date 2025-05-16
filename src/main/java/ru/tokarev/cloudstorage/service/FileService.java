@@ -41,7 +41,6 @@ public class FileService {
                 .fileSize(String.valueOf(size)) // TODO:: to Long
                 .contentType(contentType)
                 .uploadedAt(LocalDateTime.now())
-                .fileType(Type.UNKNOWN)
                 .folder(parentFolder)
                 .build();
 

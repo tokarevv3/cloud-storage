@@ -21,9 +21,11 @@ public class UserReadMapper implements Mapper<User, UserReadDto> {
                 .orElse(null);
         return new UserReadDto(
                 obj.getId(),
-                obj.getUsername(),
-                obj.getLogin(),
-                bucket);
+                obj.getFirstName(),
+                obj.getLastName(),
+                obj.getEmail(),
+                bucket,
+                obj.getRole());
     }
 
 }

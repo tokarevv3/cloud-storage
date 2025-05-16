@@ -9,7 +9,9 @@ import ru.tokarev.cloudstorage.database.entity.Role;
 public class UserReadDto {
 
     Long id;
-    String username;
-    String login;
+    String firstName;
+    String lastName;
+    String email;
     BucketReadDto bucket;
+    Role role;
 }

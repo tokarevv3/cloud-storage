@@ -2,14 +2,21 @@ package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.tokarev.cloudstorage.database.entity.Bucket;
 import ru.tokarev.cloudstorage.database.entity.Folder;
 import ru.tokarev.cloudstorage.database.entity.User;
+import ru.tokarev.cloudstorage.dto.JwtResponse;
 import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
+import ru.tokarev.cloudstorage.provider.JwtTokenProvider;
 
 import java.util.Optional;
 
@@ -21,21 +28,25 @@ public class LoginService {
     private final BucketService bucketService;
     private final UserService userService;
     private final FolderService folderService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider tokenProvider;
 
 
-    public void registerUser(UserCreateEditDto newUser) {
+    public Optional<User> registerUser(UserCreateEditDto newUser) {
 
-        log.info("Registering new user: " + newUser.getUsername());
+        log.info("Registering new user: " + newUser.getEmail());
         Optional<User> createdUser = userService.create(newUser);
-        createdUser.ifPresent(user -> log.info("Successfully created user with id: " + user.getId()));
+        createdUser.ifPresent(user -> log.info("Successfully created user with id: {}", user.getId()));
 
         log.info("Creating bucket for user id: " + createdUser.get().getId());
         Optional<Bucket> createdBucket = bucketService.createBucket(createdUser.get());
-        createdBucket.ifPresent(bucket -> log.info("Successfully created bucket with id: " + bucket.getId()));
+        createdBucket.ifPresent(bucket -> log.info("Successfully created bucket with id: {}", bucket.getId()));
 
         log.info("Creating root folder for bucket: " + createdBucket.get().getName());
         Optional<Folder> createdRootFolder = folderService.createRootFolder(createdBucket.get());
-        createdRootFolder.ifPresent(folder -> log.info("Successfully created root folder with id: " + folder.getId()));
+        createdRootFolder.ifPresent(folder -> log.info("Successfully created root folder with id: {}", folder.getId()));
+
+        return createdUser;
 
     }
 
@@ -43,8 +54,26 @@ public class LoginService {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         UserDetails currentUserPrincipal = (UserDetails) securityContext.getAuthentication().getPrincipal();
 
-        return userService.findByUsername(currentUserPrincipal.getUsername()).get();
+        return userService.findByUsername(currentUserPrincipal.getUsername()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
 
+    public ResponseEntity<?> authenticateUser(String email, String password) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            email,
+                            password
+                    )
+            );
+            log.info("Successfully logged in for user: {}", email);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String jwt = tokenProvider.generateToken(authentication);
+            return ResponseEntity.ok(new JwtResponse(jwt));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Wrong username or password.");
+        }
+    }
 }

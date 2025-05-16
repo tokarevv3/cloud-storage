@@ -31,10 +31,8 @@ public class UserCreateEditMapper implements Mapper<UserCreateEditDto, User> {
     }
 
     private void copy(UserCreateEditDto fromObj, User toObj) {
-        toObj.setUsername(fromObj.getUsername());
-        toObj.setLogin(fromObj.getLogin());
-        toObj.setBucket(fromObj.getBucket());
-        toObj.setRole(fromObj.getRole());
+        toObj.setFirstName(fromObj.getFirstName());
+        toObj.setLastName(fromObj.getLastName());
 
         Optional.ofNullable(fromObj.getRawPassword())
                 .filter(StringUtils::hasText)

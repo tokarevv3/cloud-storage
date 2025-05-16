@@ -1,9 +1,7 @@
 package ru.tokarev.cloudstorage.http.controller.rest;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.tokarev.cloudstorage.dto.BucketReadDto;
 import ru.tokarev.cloudstorage.dto.UserReadDto;
 import ru.tokarev.cloudstorage.service.BucketService;
@@ -27,5 +25,15 @@ public class AdminPanelController {
     @GetMapping("/buckets")
     public List<BucketReadDto> getAllBuckets() {
         return bucketService.findAll();
+    }
+
+    @PatchMapping("{userId}/admin")
+    public boolean makeUserAdmin(@PathVariable Long userId) {
+        return userService.makeUserAdmin(userId);
+    }
+
+    @DeleteMapping("{userId}/delete")
+    public boolean deleteUser(@PathVariable Long userId) {
+        return userService.delete(userId);
     }
 }

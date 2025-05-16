@@ -15,6 +15,7 @@ import ru.tokarev.cloudstorage.dto.FolderTreeNode;
 import ru.tokarev.cloudstorage.mapper.FolderCreateEditMapper;
 import ru.tokarev.cloudstorage.mapper.FolderReadMapper;
 
+import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,8 +33,8 @@ public class FolderService {
     private final FileService fileService;
 
     @Transactional
-    public Optional<FolderReadDto> createFolder(String folderName, Long folderId) {
-        Folder parentFolder = folderRepository.getFolderById(folderId);
+    public Optional<FolderReadDto> createFolder(String folderName, Long folderId) throws FileNotFoundException {
+        Folder parentFolder = folderRepository.getFolderById(folderId).orElseThrow(FileNotFoundException::new);
         String path = parentFolder.getPath() + parentFolder.getName() + "/";
 
         FolderCreateEditDto folderCreateEditDto = new FolderCreateEditDto(
@@ -103,7 +104,7 @@ public class FolderService {
         return folderRepository.getAllFoldersByParentId(folder);
     }
 
-    public Folder getFolderById(Long id) {
+    public Optional<Folder> getFolderById(Long id) {
         return folderRepository.getFolderById(id);
     }
 

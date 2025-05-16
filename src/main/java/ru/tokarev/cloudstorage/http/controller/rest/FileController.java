@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.tokarev.cloudstorage.service.PreviewService;
 
+import java.io.FileNotFoundException;
+
 
 @RestController
 @RequestMapping("/api/file")
@@ -24,7 +26,7 @@ public class FileController {
     }
 
     @DeleteMapping("{fileId}/delete")
-    public ResponseEntity<?> deleteFile(@PathVariable("fileId") Long fileId) {
+    public ResponseEntity<?> deleteFile(@PathVariable("fileId") Long fileId) throws FileNotFoundException {
         return ResponseEntity.ok(previewService.deleteFile(fileId));
     }
 

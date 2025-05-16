@@ -11,6 +11,7 @@ import ru.tokarev.cloudstorage.database.entity.File;
 import ru.tokarev.cloudstorage.database.entity.Folder;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FolderRepository extends JpaRepository<Folder, Long> {
@@ -19,7 +20,7 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
 
      Folder getFolderByPathAndBucketId(String path, Bucket bucket);
 
-     Folder getFolderById(long id);
+     Optional<Folder> getFolderById(long id);
 
      @Query("select f from Folder f where f.parent = :parent")
      List<Folder> getAllFoldersByParentId(@Param("parent") Folder parent);

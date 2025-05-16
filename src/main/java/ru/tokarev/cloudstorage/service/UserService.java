@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.tokarev.cloudstorage.database.entity.Role;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.database.repositorty.UserRepository;
 import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
@@ -27,6 +28,8 @@ public class UserService implements UserDetailsService {
 
     private final UserCreateEditMapper userCreateEditMapper;
     private final UserReadMapper userReadMapper;
+
+    private final Role USER_ADMIN_ROLE = Role.ADMIN;
 
     public Optional<User> findById(Long id) {
         return userRepository
@@ -56,9 +59,7 @@ public class UserService implements UserDetailsService {
 
     public Optional<UserReadDto> update(Long id, UserCreateEditDto userCreateEditDto) {
         return userRepository.findById(id)
-                .map(entity -> {
-                    return userCreateEditMapper.map(userCreateEditDto, entity);
-                })
+                .map(entity -> userCreateEditMapper.map(userCreateEditDto, entity))
                 .map(userRepository::saveAndFlush)
                 .map(userReadMapper::map);
     }
@@ -71,16 +72,26 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
+    public UserDetails loadUserByUsername(String username)  {
+        return userRepository.findByEmail(username)
                 .map(user -> new org.springframework.security.core.userdetails.User(
-                        user.getUsername(),
+                        user.getEmail(),
                         user.getPassword(),
                         Collections.singleton(user.getRole())
                 )).orElseThrow(() -> new UsernameNotFoundException("Failed to retrieve user: " + username));
     }
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByEmail(username);
+    }
+
+    public boolean makeUserAdmin(Long userId) {
+        User userRepositoryById = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        userRepositoryById.setRole(USER_ADMIN_ROLE);
+
+        userRepository.saveAndFlush(userRepositoryById);
+
+        return true;
     }
 }

@@ -1,8 +1,6 @@
 package ru.tokarev.cloudstorage.dto;
 
 import lombok.Value;
-import ru.tokarev.cloudstorage.database.entity.Bucket;
-import ru.tokarev.cloudstorage.database.entity.Folder;
 
 import java.time.LocalDateTime;
 
@@ -10,9 +8,7 @@ import java.time.LocalDateTime;
 public class FolderReadDto {
 
     Long id;
-    String name;
-    String path;
+    String folderName;
+    String folderPath;
     LocalDateTime uploadedAt;
-    Folder parentId;
-    Bucket bucketId;
 }
