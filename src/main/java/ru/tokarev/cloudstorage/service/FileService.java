@@ -78,4 +78,8 @@ public class FileService {
     public File saveFile(File file) {
         return fileRepository.saveAndFlush(file);
     }
+
+    public List<File> findFilesByUserIdAndName(Long id, String search) {
+        return fileRepository.findByUserIdAndFileNameLike(id, search);
+    }
 }

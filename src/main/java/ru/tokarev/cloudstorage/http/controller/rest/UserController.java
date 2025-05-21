@@ -1,6 +1,7 @@
 package ru.tokarev.cloudstorage.http.controller.rest;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ import ru.tokarev.cloudstorage.service.UserService;
 
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -26,7 +28,7 @@ public class UserController {
     private final LoginService loginService;
     private final PreviewService previewService;
 
-    @GetMapping("/settings")
+    @GetMapping("/user")
     public ResponseEntity<?> getUser() {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -34,12 +36,22 @@ public class UserController {
         return ResponseEntity.ok(userReadDto);
     }
 
-    @PutMapping("/settings")
-    public ResponseEntity<?> updateUser(@RequestBody UserCreateEditDto userCreateEditDto) {
+    @PutMapping("/user/update")
+    public ResponseEntity<?> updateUserName(@RequestBody UserCreateEditDto userCreateEditDto) {
         User currentUser = loginService.getAuthenticatedUser();
 
 //        return previewService.updateUser(currentUser.getId(), userCreateEditDto);
 
         return ResponseEntity.ok(userService.update(currentUser.getId(), userCreateEditDto));
+    }
+
+    @PatchMapping("/user/password")
+    public ResponseEntity<?> updateUserPassword(
+//            @RequestBody UserPasswordDto userPasswordDto,
+            @RequestBody String password) {
+        log.info("Trying to update user password");
+        User currentUser = loginService.getAuthenticatedUser();
+
+        return ResponseEntity.ok(userService.updatePassword(currentUser.getId(), password));
     }
 }

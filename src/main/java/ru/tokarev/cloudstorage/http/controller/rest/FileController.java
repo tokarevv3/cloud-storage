@@ -15,6 +15,11 @@ public class FileController {
 
     private final PreviewService previewService;
 
+    @GetMapping
+    public ResponseEntity<?> findFiles(@RequestParam("search") String search) {
+        return ResponseEntity.ok(previewService.findFiles(search));
+    }
+
     @GetMapping("{fileId}/download")
     public ResponseEntity<byte[]> downloadFile(@PathVariable("fileId") Long downloadFileId) {
         return previewService.getFileToClient(downloadFileId);

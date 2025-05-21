@@ -23,6 +23,7 @@ import ru.tokarev.cloudstorage.mapper.FolderReadMapper;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -345,5 +346,17 @@ public class PreviewService {
         return folderService.getFolderById(folderId)
                 .map(folderReadMapper::map)
                 .orElse(null);
+    }
+
+    public Map<Long, String> findFiles(String search) {
+        User currentUser = loginService.getAuthenticatedUser();
+
+        List<File> filesByUserIdAndName = fileService.findFilesByUserIdAndName(currentUser.getId(), search);
+
+        return filesByUserIdAndName.stream()
+        .collect(Collectors.toMap(
+                this::getIdFromObject,
+                this::getNameFromObject
+        ));
     }
 }

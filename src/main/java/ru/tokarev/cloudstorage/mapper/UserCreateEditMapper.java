@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import ru.tokarev.cloudstorage.database.entity.Bucket;
+import ru.tokarev.cloudstorage.database.entity.Role;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
 
@@ -33,6 +35,14 @@ public class UserCreateEditMapper implements Mapper<UserCreateEditDto, User> {
     private void copy(UserCreateEditDto fromObj, User toObj) {
         toObj.setFirstName(fromObj.getFirstName());
         toObj.setLastName(fromObj.getLastName());
+
+        if (toObj.getEmail() == null) {
+            toObj.setEmail(fromObj.getEmail());
+        }
+
+        if (toObj.getRole() == null) {
+            toObj.setRole(Role.USER);
+        }
 
         Optional.ofNullable(fromObj.getRawPassword())
                 .filter(StringUtils::hasText)

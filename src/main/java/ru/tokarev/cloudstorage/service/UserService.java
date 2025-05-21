@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.tokarev.cloudstorage.database.entity.Role;
@@ -30,6 +31,7 @@ public class UserService implements UserDetailsService {
     private final UserReadMapper userReadMapper;
 
     private final Role USER_ADMIN_ROLE = Role.ADMIN;
+    private final PasswordEncoder passwordEncoder;
 
     public Optional<User> findById(Long id) {
         return userRepository
@@ -91,6 +93,19 @@ public class UserService implements UserDetailsService {
         userRepositoryById.setRole(USER_ADMIN_ROLE);
 
         userRepository.saveAndFlush(userRepositoryById);
+
+        return true;
+    }
+
+    public boolean updatePassword(Long userId, String password) {
+        User updateUser = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        String encodedPassword = passwordEncoder.encode(password);
+
+
+        updateUser.setPassword(encodedPassword);
+
+        userRepository.save(updateUser);
 
         return true;
     }
