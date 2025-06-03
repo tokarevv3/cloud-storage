@@ -46,9 +46,9 @@ public class LoginController {
         log.info("Registering user with login: " + userDto.getEmail());
 
         try {
-            User user = loginService.registerUser(userDto).orElseThrow(RuntimeException::new);
+            loginService.registerUser(userDto).orElseThrow(RuntimeException::new);
 
-            return loginService.authenticateUser(user.getEmail(), user.getPassword());
+            return loginService.authenticateUser(userDto.getEmail(), userDto.getRawPassword());
         } catch (Exception e) {
             log.error("Registration error: {}", e.getMessage());
             return ResponseEntity.badRequest().body("Ошибка регистрации: " + e.getMessage());

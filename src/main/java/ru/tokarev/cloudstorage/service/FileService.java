@@ -6,10 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.tokarev.cloudstorage.database.entity.*;
 import ru.tokarev.cloudstorage.database.repositorty.FileRepository;
-import ru.tokarev.cloudstorage.dto.FileReadDto;
 import ru.tokarev.cloudstorage.exception.BucketSizeExceededException;
 
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +22,7 @@ public class FileService {
 
 
     public List<File> getFilesInFolder(Folder folder) {
-        return fileRepository.getAllFilesByParentId(folder);
+        return fileRepository.findAllByParentFolder(folder);
     }
 
     public Optional<File> getFile(Long id) {
@@ -50,18 +48,10 @@ public class FileService {
             fileRepository.saveAndFlush(file);
             return true;
         } catch (BucketSizeExceededException e) {
+            log.error(e.getMessage());
             return false;
         }
 
-    }
-
-
-
-    public static String isSlashEnded(String path) {
-        if (path.charAt(path.length() - 1) != '/') {
-            path = path + '/';
-        }
-        return path;
     }
 
     public void deleteFile(Long id) {

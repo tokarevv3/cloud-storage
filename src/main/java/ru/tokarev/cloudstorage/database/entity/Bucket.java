@@ -3,7 +3,6 @@ package ru.tokarev.cloudstorage.database.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +37,6 @@ public class Bucket {
     private Folder rootFolder;
 
     public void updateSize(Long size) {
-
         this.size += size;
     }
 }

@@ -11,14 +11,7 @@ import java.util.Optional;
 
 public interface BucketRepository extends JpaRepository<Bucket, Long> {
 
-//    @Query
-//    Folder getRootFolderByBucketId(Long id);
-
-//    Optional<Bucket> findByName(String name);
-
-    @Query("select b.size from Bucket b where b.id = :id")
-    Long getSize(Long id);
-
+    // delete
     Optional<Bucket> findByName(String name);
 
     boolean existsByRootFolder(Folder rootFolder);

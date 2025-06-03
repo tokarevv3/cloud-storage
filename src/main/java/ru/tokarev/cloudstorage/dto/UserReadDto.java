@@ -14,4 +14,5 @@ public class UserReadDto {
     String email;
     BucketReadDto bucket;
     Role role;
+    Long maxCapacityInGb;
 }

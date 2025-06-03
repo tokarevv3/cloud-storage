@@ -1,5 +1,6 @@
 package ru.tokarev.cloudstorage.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,9 +36,15 @@ public class BucketService {
     private final String defaultBucketName = "user-bucket-";
 
     @Value("${minio.user.capacity}")
+    private Integer adminMaxBucketSize;
     private Long maxBucketSize;
+    private boolean toggleCapacity = true;
 
-    // What it really should to return? boolean or DTO?
+    @PostConstruct
+    private void init() {
+        this.maxBucketSize = adminMaxBucketSize * 8L * 1024 * 1024 * 1024;
+    }
+
     public Optional<Bucket> createBucket( User user) {
         String bucketName = defaultBucketName + user.getId();
 
@@ -61,14 +68,6 @@ public class BucketService {
         return Optional.empty();
     }
 
-    //TODO:: create normal getBucket method
-    public Optional<Bucket> getBucketByName(String bucketName) {
-        return bucketRepository.findByName(bucketName);
-    }
-
-    public Optional<Bucket> getBucketById(Long id) {
-        return bucketRepository.findById(id);
-    }
 
     public Optional<Bucket> saveBucket(Bucket bucket) {
         return Optional.of(bucketRepository.saveAndFlush(bucket));
@@ -79,17 +78,38 @@ public class BucketService {
     }
 
     public void updateBucketSize(Bucket bucket, long size) throws BucketSizeExceededException {
-        if (bucket.getSize() + size > maxBucketSize) {
-            throw new BucketSizeExceededException("Bucket size exceeded over limit.");
-        } else {
-            bucket.setSize(bucket.getSize() + size);
-            bucketRepository.saveAndFlush(bucket);
+
+        if (toggleCapacity) {
+
+            if (bucket.getSize() + size > maxBucketSize) {
+                throw new BucketSizeExceededException("Bucket size exceeded over limit.");
+            } else {
+                bucket.setSize(bucket.getSize() + size);
+                bucketRepository.saveAndFlush(bucket);
+            }
         }
+
     }
 
     public List<BucketReadDto> findAll() {
         return bucketRepository.findAll().stream()
                 .map(bucketReadMapper::map)
                 .toList();
+    }
+
+    public boolean setCapacity(Integer capacity) {
+        if ((capacity > 0) && (capacity <=50)) {
+            adminMaxBucketSize = capacity;
+            return true;
+        }
+        return false;
+    }
+
+    public void togleCapacity(Boolean toggle) {
+        toggleCapacity = toggle;
+    }
+
+    public Long getMaxCapacity() {
+        return maxBucketSize;
     }
 }

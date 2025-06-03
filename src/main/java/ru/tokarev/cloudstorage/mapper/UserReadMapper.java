@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.dto.BucketReadDto;
 import ru.tokarev.cloudstorage.dto.UserReadDto;
+import ru.tokarev.cloudstorage.service.BucketService;
 
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 public class UserReadMapper implements Mapper<User, UserReadDto> {
 
     private final BucketReadMapper bucketReadMapper;
+    private final BucketService bucketService;
 
     @Override
     public UserReadDto map(User obj) {
@@ -25,7 +27,8 @@ public class UserReadMapper implements Mapper<User, UserReadDto> {
                 obj.getLastName(),
                 obj.getEmail(),
                 bucket,
-                obj.getRole());
+                obj.getRole(),
+                bucketService.getMaxCapacity());
     }
 
 }

@@ -1,7 +1,9 @@
 package ru.tokarev.cloudstorage.http.controller.rest;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import ru.tokarev.cloudstorage.database.entity.Role;
 import ru.tokarev.cloudstorage.dto.BucketReadDto;
 import ru.tokarev.cloudstorage.dto.UserReadDto;
 import ru.tokarev.cloudstorage.service.BucketService;
@@ -16,6 +18,11 @@ public class AdminPanelController {
 
     private final UserService userService;
     private final BucketService bucketService;
+
+    @GetMapping("/allow")
+    public boolean allow() {
+        return true;
+    }
 
     @GetMapping("/users")
     public List<UserReadDto> getAllUsers() {
@@ -35,5 +42,16 @@ public class AdminPanelController {
     @DeleteMapping("{userId}/delete")
     public boolean deleteUser(@PathVariable Long userId) {
         return userService.delete(userId);
+    }
+
+    @PostMapping("/capacity")
+    public boolean changeUserCapacity(@RequestParam Integer capacity) {
+        return bucketService.setCapacity(capacity);
+    }
+
+    @PatchMapping("/capacity")
+    public boolean toggleUserCapacity(@RequestParam Boolean toggle) {
+        bucketService.togleCapacity(toggle);
+        return true;
     }
 }

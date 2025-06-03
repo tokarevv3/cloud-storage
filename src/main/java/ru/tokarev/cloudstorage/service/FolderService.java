@@ -84,13 +84,13 @@ public class FolderService {
         return Optional.empty();
     }
 
-    public Folder getFolderByPath(String path) {
-        return folderRepository.getFolderByPath(path);
-    }
-
-    public Folder getFolderByPathAndBucket(String path, Bucket bucket) {
-        return folderRepository.getFolderByPathAndBucketId(path, bucket);
-    }
+//    public Folder getFolderByPath(String path) {
+//        return folderRepository.getFolderByPath(path);
+//    }
+//
+//    public Folder getFolderByPathAndBucket(String path, Bucket bucket) {
+//        return folderRepository.getFolderByPathAndBucketId(path, bucket);
+//    }
 
     public Folder getFolderByNameAndBucket(String folderName, Bucket bucket) {
         return folderRepository.getFolderByNameAndBucketId(folderName, bucket);

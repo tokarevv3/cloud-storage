@@ -30,6 +30,7 @@ public class WildcardController {
                                       @RequestPart(required = false) MultipartFile file,
                                       @RequestParam(required = false) String folderName) {
         if (file != null) {
+            log.info("Trying to upload file");
             return ResponseEntity.ok(previewService.uploadFile(file, getPath(request)));
         } else if (folderName != null) {
             String folderPath = getPath(request);

@@ -2,6 +2,7 @@ package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,8 +16,6 @@ import ru.tokarev.cloudstorage.database.entity.Folder;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.dto.FileReadDto;
 import ru.tokarev.cloudstorage.dto.FolderCreateEditDto;
-import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
-import ru.tokarev.cloudstorage.dto.UserReadDto;
 import ru.tokarev.cloudstorage.mapper.FileReadMapper;
 import ru.tokarev.cloudstorage.mapper.FolderReadMapper;
 
@@ -40,8 +39,8 @@ public class PreviewService {
     private final FileReadMapper fileReadMapper;
     private final LoginService loginService;
     private final FolderReadMapper folderReadMapper;
-    private final UserService userService;
 
+    @Cacheable
     public Map<Long, String> getListOfFilesAndFoldersInFolder(String path) {
 
         User currentUser = loginService.getAuthenticatedUser();
@@ -97,6 +96,7 @@ public class PreviewService {
         }
 
         try {
+            log.info("Uploading file: " + file.getOriginalFilename());
             if (fileService.uploadFile(
                     file.getOriginalFilename(),
                     path + "/",
@@ -205,10 +205,10 @@ public class PreviewService {
     }
 
     public Boolean deleteFolder(Long folderId) throws FileNotFoundException {
-        Long userBucketId = loginService.getAuthenticatedUser().getBucket().getId();
+        Long userId = loginService.getAuthenticatedUser().getId();
         Folder folderById = folderService.getFolderById(folderId).orElseThrow(FileNotFoundException::new);
-        Long folderBucketId = folderById.getBucketId().getId();
-        if (userBucketId.equals(folderBucketId)) {
+        Long folderUserId = folderById.getBucketId().getUser().getId();
+        if (userId.equals(folderUserId)) {
             log.info("Trying to delete folder: " + folderId);
             return folderService.deleteFolderById(folderId);
         } else {
