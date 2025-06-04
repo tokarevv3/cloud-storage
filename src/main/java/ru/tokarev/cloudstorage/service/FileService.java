@@ -36,7 +36,7 @@ public class FileService {
         File file = File.builder()
                 .fileName(fileName)
                 .filePath(filePath)
-                .fileSize(String.valueOf(size)) // TODO:: to Long
+                .fileSize(size) // TODO:: to Long
                 .contentType(contentType)
                 .uploadedAt(LocalDateTime.now())
                 .folder(parentFolder)
@@ -58,8 +58,8 @@ public class FileService {
 
         getFile(id).ifPresent(file -> {
             Bucket bucket = file.getFolder().getBucketId();
-            String fileSize = file.getFileSize();
-            bucket.updateSize(-Long.parseLong(fileSize));
+            Long fileSize = file.getFileSize();
+            bucket.updateSize(-fileSize);
         });
 
         fileRepository.deleteById(id);

@@ -15,6 +15,6 @@ public class FileReadDto {
 
     LocalDateTime uploadedAt;
 
-    String fileSize;
+    Long fileSize;
 
 }

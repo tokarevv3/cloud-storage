@@ -33,5 +33,5 @@ public class File {
 
     private String contentType;
 
-    private String fileSize;
+    private Long fileSize;
 }
