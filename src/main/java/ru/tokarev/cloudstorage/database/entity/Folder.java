@@ -39,5 +39,4 @@ public class Folder {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Nullable
     private Bucket bucketId;
-
 }

@@ -78,63 +78,6 @@ public class S3Service {
         }
     }
 
-    public boolean uploadFile(String bucketName, String filePathName, InputStream inputStream, long size) {
-
-        try {
-            minioClient.putObject(PutObjectArgs.builder()
-                    .bucket(bucketName)
-                    .object(filePathName)
-                    .stream(inputStream, size, -1)
-                    .build());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean uploadFile(String bucketName, String fileName, String path, InputStream inputStream, long size) {
-
-        try {
-            minioClient.putObject(PutObjectArgs.builder()
-                    .bucket(bucketName)
-                    .object(path + "/" + fileName)
-                    .stream(inputStream, size, -1)
-                    .build());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-
-    //TODO: remake
-    public List<String> uploadFiles(List<MultipartFile> files, String folderPath) throws Exception {
-
-        List<String> uploadedFiles = new ArrayList<>();
-
-        for (MultipartFile file : files) {
-            String objectName = folderPath + file.getOriginalFilename();
-
-            try (InputStream inputStream = file.getInputStream()) {
-                minioClient.putObject(
-                        PutObjectArgs.builder()
-                                .bucket("base-bucket")
-                                .object(objectName)
-                                .stream(inputStream, file.getSize(), -1)
-                                .contentType(file.getContentType())
-                                .build()
-                );
-                uploadedFiles.add(objectName);
-            } catch (MinioException e) {
-                throw new Exception("Failed to upload file to MinIO: " + e.getMessage());
-            }
-        }
-
-        return uploadedFiles;
-    }
-
     public boolean createFolder(String bucketName, String folderName, String path) {
         try {
             minioClient.putObject(PutObjectArgs.builder()

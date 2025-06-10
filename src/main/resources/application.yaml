@@ -1,8 +1,10 @@
 spring:
+  flyway:
+    enabled: true
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-    username: ${SPRING_DATASOURCE_USERNAME}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/cloud-storage-bd}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
     driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
@@ -17,10 +19,9 @@ spring:
       max-file-size: 100MB
 minio:
   root:
-    username: ${MINIO_ACCESS_KEY}
-    password: ${MINIO_SECRET_KEY}
-    endpoint: ${MINIO_ENDPOINT}
-
+    endpoint: ${MINIO_ENDPOINT:http://minio:9000}
+    username: ${MINIO_ROOT_USER:minioadmin}
+    password: ${MINIO_ROOT_PASSWORD:minioadmin}
   user:
     folder: root-folder
     capacity: 5

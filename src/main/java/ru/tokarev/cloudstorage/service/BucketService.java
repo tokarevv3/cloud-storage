@@ -11,7 +11,6 @@ import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.database.repositorty.BucketRepository;
 import ru.tokarev.cloudstorage.dto.BucketCreateEditDto;
 import ru.tokarev.cloudstorage.dto.BucketReadDto;
-import ru.tokarev.cloudstorage.dto.UserReadDto;
 import ru.tokarev.cloudstorage.exception.BucketSizeExceededException;
 import ru.tokarev.cloudstorage.mapper.BucketCreateEditMapper;
 import ru.tokarev.cloudstorage.mapper.BucketReadMapper;
@@ -105,7 +104,7 @@ public class BucketService {
         return false;
     }
 
-    public void togleCapacity(Boolean toggle) {
+    public void toggleCapacity(Boolean toggle) {
         toggleCapacity = toggle;
     }
 

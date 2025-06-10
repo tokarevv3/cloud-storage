@@ -1,9 +1,7 @@
 package ru.tokarev.cloudstorage.http.controller.rest;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import ru.tokarev.cloudstorage.database.entity.Role;
 import ru.tokarev.cloudstorage.dto.BucketReadDto;
 import ru.tokarev.cloudstorage.dto.UserReadDto;
 import ru.tokarev.cloudstorage.service.BucketService;
@@ -51,7 +49,7 @@ public class AdminPanelController {
 
     @PatchMapping("/capacity")
     public boolean toggleUserCapacity(@RequestParam Boolean toggle) {
-        bucketService.togleCapacity(toggle);
+        bucketService.toggleCapacity(toggle);
         return true;
     }
 }

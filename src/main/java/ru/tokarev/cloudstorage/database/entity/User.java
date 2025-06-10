@@ -34,5 +34,4 @@ public class User {
         this.bucket = bucket;
         bucket.setUser(this);
     }
-
 }

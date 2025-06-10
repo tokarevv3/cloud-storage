@@ -102,7 +102,6 @@ public class UserService implements UserDetailsService {
 
         String encodedPassword = passwordEncoder.encode(password);
 
-
         updateUser.setPassword(encodedPassword);
 
         userRepository.save(updateUser);

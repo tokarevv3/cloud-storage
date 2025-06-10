@@ -56,8 +56,6 @@ public class FolderService {
                     .map(folderReadMapper::map);
 
         }
-
-
         return Optional.empty();
     }
 
@@ -83,14 +81,6 @@ public class FolderService {
         }
         return Optional.empty();
     }
-
-//    public Folder getFolderByPath(String path) {
-//        return folderRepository.getFolderByPath(path);
-//    }
-//
-//    public Folder getFolderByPathAndBucket(String path, Bucket bucket) {
-//        return folderRepository.getFolderByPathAndBucketId(path, bucket);
-//    }
 
     public Folder getFolderByNameAndBucket(String folderName, Bucket bucket) {
         return folderRepository.getFolderByNameAndBucketId(folderName, bucket);
@@ -122,19 +112,15 @@ public class FolderService {
             log.warn("Skipping deletion of folder {} — linked to a bucket", folder.getId());
             return;
         }
-
         fileService.getFilesInFolder(folder)
                 .forEach(file -> fileService.deleteFile(file.getId()));
 
         folderRepository.getAllFoldersByParentId(folder)
                 .forEach(this::deleteFolderRecursive);
 
-
-
         log.warn("Trying to delete folder {}", folder.getId());
         folderRepository.deleteById(folder.getId());
         folderRepository.flush();
-
     }
 
     public List<FolderTreeNode> getUserFolderTree(Bucket userBucket) {;
@@ -156,7 +142,6 @@ public class FolderService {
             node.setChildren(buildTree(folder.getId(), byParentId));
             result.add(node);
         }
-
         return result;
     }
 
@@ -178,6 +163,5 @@ public class FolderService {
             folderInFolder.setPath(currentNewPath);
             updateFolderRecursive(folderInFolder);
         }
-
     }
 }

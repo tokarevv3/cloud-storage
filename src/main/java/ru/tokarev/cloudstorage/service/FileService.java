@@ -29,14 +29,12 @@ public class FileService {
         return fileRepository.findById(id);
     }
 
-
-    //TODO: pure SQL method, disctruct to s3service upload method
     public boolean uploadFile(String fileName, String filePath, long size, String contentType, Folder parentFolder) {
 
         File file = File.builder()
                 .fileName(fileName)
                 .filePath(filePath)
-                .fileSize(size) // TODO:: to Long
+                .fileSize(size)
                 .contentType(contentType)
                 .uploadedAt(LocalDateTime.now())
                 .folder(parentFolder)
@@ -55,7 +53,6 @@ public class FileService {
     }
 
     public void deleteFile(Long id) {
-
         getFile(id).ifPresent(file -> {
             Bucket bucket = file.getFolder().getBucketId();
             Long fileSize = file.getFileSize();

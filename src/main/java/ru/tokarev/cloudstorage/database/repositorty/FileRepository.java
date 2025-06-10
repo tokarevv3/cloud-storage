@@ -12,7 +12,6 @@ import java.util.List;
 @Repository
 public interface FileRepository extends JpaRepository<File, Long> {
 
-
     @Query("select f from File f where f.folder = :parent")
     List<File> findAllByParentFolder(@Param("parent") Folder parent);
 

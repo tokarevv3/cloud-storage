@@ -47,7 +47,6 @@ public class LoginService {
         createdRootFolder.ifPresent(folder -> log.info("Successfully created root folder with id: {}", folder.getId()));
 
         return createdUser;
-
     }
 
     public User getAuthenticatedUser() {
@@ -56,7 +55,6 @@ public class LoginService {
 
         return userService.findByUsername(currentUserPrincipal.getUsername()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
-
 
     public ResponseEntity<?> authenticateUser(String email, String password) {
         try {

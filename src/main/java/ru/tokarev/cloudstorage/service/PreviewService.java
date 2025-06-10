@@ -154,7 +154,6 @@ public class PreviewService {
         return s3Service.downloadFile(bucket,fileName);
     }
 
-    //TODO:: add logic to check if folder with that name already exist
     public FolderCreateEditDto createFolder(String folderName, String folderPath) {
 
         Bucket userBucket = loginService.getAuthenticatedUser().getBucket();
@@ -246,7 +245,6 @@ public class PreviewService {
         return fileService.saveFile(file);
     }
 
-    //TODO: Need update files in folder
     public Folder moveFolder(Long folderId, Long newParentFolderId) throws FileNotFoundException {
         User user = loginService.getAuthenticatedUser();
         Bucket userBucket = user.getBucket();
