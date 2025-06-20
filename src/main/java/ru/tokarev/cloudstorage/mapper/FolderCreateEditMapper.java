@@ -22,7 +22,7 @@ public class FolderCreateEditMapper implements Mapper<FolderCreateEditDto, Folde
     public void copy(FolderCreateEditDto fromObj, Folder toObj) {
         toObj.setName(fromObj.getName());
         toObj.setPath(fromObj.getPath());
-        toObj.setBucketId(fromObj.getBucketId());
+        toObj.setBucket(fromObj.getBucketId());
         toObj.setUploadedAt(fromObj.getUploadedAt());
         toObj.setParent(fromObj.getParentId());
     }

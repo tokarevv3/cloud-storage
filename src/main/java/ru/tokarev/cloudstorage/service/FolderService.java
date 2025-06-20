@@ -42,12 +42,12 @@ public class FolderService {
                 path,
                 LocalDateTime.now(),
                 parentFolder,
-                parentFolder.getBucketId());
+                parentFolder.getBucket());
 
         log.info("Trying to create folder with part : " + folderCreateEditDto.getPath());
 
         if (s3Service.createFolder(
-                parentFolder.getBucketId().getName(),
+                parentFolder.getBucket().getName(),
                 folderCreateEditDto.getName(),
                 folderCreateEditDto.getPath())) {
             return Optional.of(folderCreateEditDto)
@@ -67,7 +67,7 @@ public class FolderService {
                 .path("/")
                 .uploadedAt(LocalDateTime.now())
                 .parent(null)
-                .bucketId(bucket) //may be null
+                .bucket(bucket) //may be null
                 .build());
 
         bucket.setRootFolder(createdFolder.orElse(null));
@@ -83,11 +83,11 @@ public class FolderService {
     }
 
     public Folder getFolderByNameAndBucket(String folderName, Bucket bucket) {
-        return folderRepository.getFolderByNameAndBucketId(folderName, bucket);
+        return folderRepository.getFolderByNameAndBucketId(folderName, bucket.getId());
     }
 
     public Folder getFolderByNameAndPathAndBucket(String folderName, String path, Bucket bucket) {
-        return folderRepository.getFolderByNameAndPathAndBucketId(folderName, path, bucket);
+        return folderRepository.getFolderByNameAndPathAndBucketId(folderName, path, bucket.getId());
     }
 
     public List<Folder> getFoldersInFolder(Folder folder) {
@@ -125,7 +125,7 @@ public class FolderService {
 
     public List<FolderTreeNode> getUserFolderTree(Bucket userBucket) {;
 
-        List<Folder> userFolders = folderRepository.findByBucketId(userBucket);
+        List<Folder> userFolders = folderRepository.findByBucketId(userBucket.getId());
 
         Map<Long, List<Folder>> byParentId = userFolders.stream()
                 .collect(Collectors.groupingBy(f -> f.getParent() == null ? 0L : f.getParent().getId()));

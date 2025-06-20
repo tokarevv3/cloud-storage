@@ -44,28 +44,27 @@ public class BucketService {
         this.maxBucketSize = adminMaxBucketSize * 8L * 1024 * 1024 * 1024;
     }
 
-    public Optional<Bucket> createBucket( User user) {
+    public Optional<Bucket> createBucket(User user) {
         String bucketName = defaultBucketName + user.getId();
 
-        BucketCreateEditDto bucket = new BucketCreateEditDto(
+        BucketCreateEditDto bucketDto = new BucketCreateEditDto(
                 bucketName,
                 0L,
                 user,
                 null);
 
+        Bucket bucket = bucketCreateEditMapper.map(bucketDto);
 
+        user.setBucket(bucket);
 
-        Optional<Bucket> bucketReadDto = Optional.of(bucket).map(bucketCreateEditMapper::map);
-
-        user.setBucket(bucketReadDto.get());
-
-        bucketReadDto.map(bucketRepository::saveAndFlush).orElseThrow();
+        Bucket savedBucket = bucketRepository.saveAndFlush(bucket);
 
         if (s3Service.createBucket(bucketName)) {
-            return bucketReadDto;
+            return Optional.of(savedBucket); // возвращаем именно сохранённый объект с ID
         }
         return Optional.empty();
     }
+
 
 
     public Optional<Bucket> saveBucket(Bucket bucket) {

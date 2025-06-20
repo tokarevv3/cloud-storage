@@ -40,7 +40,7 @@ public class FileService {
                 .folder(parentFolder)
                 .build();
 
-        Bucket bucket = parentFolder.getBucketId();
+        Bucket bucket = parentFolder.getBucket();
         try {
             bucketService.updateBucketSize(bucket, size);
             fileRepository.saveAndFlush(file);
@@ -54,7 +54,7 @@ public class FileService {
 
     public void deleteFile(Long id) {
         getFile(id).ifPresent(file -> {
-            Bucket bucket = file.getFolder().getBucketId();
+            Bucket bucket = file.getFolder().getBucket();
             Long fileSize = file.getFileSize();
             bucket.updateSize(-fileSize);
         });

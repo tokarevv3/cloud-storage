@@ -122,7 +122,7 @@ public class S3Service {
     }
 
     public boolean deleteFolder(Folder deleteFolder) {
-        String deleteFolderBucketName = deleteFolder.getBucketId().getName();
+        String deleteFolderBucketName = deleteFolder.getBucket().getName();
         String deleteFolderFullPath = deleteFolder.getPath() + deleteFolder.getName() + "/";
         log.info("Trying to delete folder: " + deleteFolderFullPath);
 

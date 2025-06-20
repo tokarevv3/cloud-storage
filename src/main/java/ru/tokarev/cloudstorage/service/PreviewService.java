@@ -150,7 +150,7 @@ public class PreviewService {
         Optional<File> file = fileService.getFile(fileId);
         String fileName = file.get().getFilePath()  + file.get().getFileName();
         fileName = fileName.substring(1);
-        String bucket = file.get().getFolder().getBucketId().getName();
+        String bucket = file.get().getFolder().getBucket().getName();
         return s3Service.downloadFile(bucket,fileName);
     }
 
@@ -191,7 +191,7 @@ public class PreviewService {
 
         Bucket userBucket = authenticatedUser.getBucket();
         File deleteFile = fileService.getFile(fileId).orElseThrow(FileNotFoundException::new);
-        Bucket deleteFileBucket = deleteFile.getFolder().getBucketId();
+        Bucket deleteFileBucket = deleteFile.getFolder().getBucket();
 
         if (userBucket.getId().equals(deleteFileBucket.getId())) {
             fileService.deleteFile(fileId);
@@ -206,7 +206,7 @@ public class PreviewService {
     public Boolean deleteFolder(Long folderId) throws FileNotFoundException {
         Long userId = loginService.getAuthenticatedUser().getId();
         Folder folderById = folderService.getFolderById(folderId).orElseThrow(FileNotFoundException::new);
-        Long folderUserId = folderById.getBucketId().getUser().getId();
+        Long folderUserId = folderById.getBucket().getUser().getId();
         if (userId.equals(folderUserId)) {
             log.info("Trying to delete folder: " + folderId);
             return folderService.deleteFolderById(folderId);
@@ -225,8 +225,8 @@ public class PreviewService {
                 .orElseThrow(() -> new IllegalArgumentException("File not found"));
         Folder newFolder = folderService.getFolderById(newParentFolderId).orElseThrow(IllegalArgumentException::new);
 
-        Long fileBucketId = file.getFolder().getBucketId().getId();
-        Long newFolderBucketId = newFolder.getBucketId().getId();
+        Long fileBucketId = file.getFolder().getBucket().getId();
+        Long newFolderBucketId = newFolder.getBucket().getId();
 
         if (!userBucketId.equals(fileBucketId) || !userBucketId.equals(newFolderBucketId)) {
             log.info("Failed to move file — access denied or invalid bucket");
@@ -235,7 +235,7 @@ public class PreviewService {
 
         String oldPath = file.getFilePath().substring(1) + file.getFileName();
         String newPath = newFolder.getPath().substring(1) + newFolder.getName() + "/" + file.getFileName();
-        String bucketName = file.getFolder().getBucketId().getName();
+        String bucketName = file.getFolder().getBucket().getName();
 
         file.setFolder(newFolder);
         file.setFilePath(newFolder.getPath() + newFolder.getName() + "/");
@@ -254,8 +254,8 @@ public class PreviewService {
         Folder folder = folderService.getFolderById(folderId).orElseThrow(FileNotFoundException::new);
         Folder newParent = folderService.getFolderById(newParentFolderId).orElseThrow(IllegalArgumentException::new);
 
-        Long folderBucketId = folder.getBucketId().getId();
-        Long newParentBucketId = newParent.getBucketId().getId();
+        Long folderBucketId = folder.getBucket().getId();
+        Long newParentBucketId = newParent.getBucket().getId();
 
         if (!userBucketId.equals(folderBucketId) || !userBucketId.equals(newParentBucketId)) {
             log.info("Failed to move folder — access denied or invalid bucket");
@@ -279,7 +279,7 @@ public class PreviewService {
     public ResponseEntity<byte[]> getFileToClient(Long previewFileId) {
         log.info("Trying to preview file with id: {}", previewFileId);
         File file = fileService.getFile(previewFileId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        Bucket fileBucket = file.getFolder().getBucketId();
+        Bucket fileBucket = file.getFolder().getBucket();
         String filePath = file.getFilePath().substring(1) + file.getFileName();
         byte[] fileBytes = s3Service.downloadFile(fileBucket.getName(), filePath);
 
@@ -296,7 +296,7 @@ public class PreviewService {
         File file = fileService.getFile(fileId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        String bucketName = file.getFolder().getBucketId().getName();
+        String bucketName = file.getFolder().getBucket().getName();
         String oldFileName = file.getFileName();
         String oldExtension = getFileExtension(oldFileName);
 
@@ -326,7 +326,7 @@ public class PreviewService {
 
     public boolean renameFolder(Long folderId, String newName) throws FileNotFoundException {
         Folder folderById = folderService.getFolderById(folderId).orElseThrow(FileNotFoundException::new);
-        String bucketName = folderById.getBucketId().getName();
+        String bucketName = folderById.getBucket().getName();
         String folderPath = folderById.getPath().substring(1);
         String oldPath = folderPath + folderById.getName() + "/";
         String newPath = folderPath + newName + "/";

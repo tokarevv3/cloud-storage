@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
                                      last_name VARCHAR NOT NULL,
                                      email VARCHAR NOT NULL,
                                      password VARCHAR NOT NULL,
-                                     role VARCHAR NOT NULL,
+                                     role SMALLINT NOT NULL,
                                      bucket_id BIGINT
 );
 

@@ -29,7 +29,7 @@ public class Bucket {
     private User user;
 
     @Builder.Default
-    @OneToMany(mappedBy = "bucketId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "bucket", fetch = FetchType.LAZY)
     private List<Folder> folders = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)

@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(of = "bucketId")
+@ToString(of = "bucket")
 public class Folder {
 
     @Id
@@ -38,5 +38,5 @@ public class Folder {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Nullable
-    private Bucket bucketId;
+    private Bucket bucket;
 }

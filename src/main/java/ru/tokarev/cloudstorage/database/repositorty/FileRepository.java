@@ -15,6 +15,6 @@ public interface FileRepository extends JpaRepository<File, Long> {
     @Query("select f from File f where f.folder = :parent")
     List<File> findAllByParentFolder(@Param("parent") Folder parent);
 
-    @Query("select f from File f where f.folder.bucketId.user.id = :userId and f.fileName like concat('%', :search, '%')")
+    @Query("select f from File f where f.folder.bucket.user.id = :userId and f.fileName like concat('%', :search, '%')")
     List<File> findByUserIdAndFileNameLike(Long userId, String search);
 }

@@ -18,9 +18,9 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
      @Query("select f from Folder f where f.parent = :parent")
      List<Folder> getAllFoldersByParentId(@Param("parent") Folder parent);
 
-     Folder getFolderByNameAndPathAndBucketId(String name, String path, Bucket bucketId);
+     Folder getFolderByNameAndPathAndBucketId(String name, String path, Long bucket_id);
 
-     Folder getFolderByNameAndBucketId(String folderName, Bucket bucket);
+     Folder getFolderByNameAndBucketId(String name, Long bucket_id);
 
-     List<Folder> findByBucketId(Bucket bucketId);
+     List<Folder> findByBucketId(Long bucket_id);
 }
