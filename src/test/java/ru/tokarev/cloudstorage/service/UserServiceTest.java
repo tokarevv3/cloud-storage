@@ -1,10 +1,7 @@
 package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,8 +9,7 @@ import ru.tokarev.cloudstorage.TestCloudStorageApplication;
 import ru.tokarev.cloudstorage.database.entity.Role;
 import ru.tokarev.cloudstorage.database.entity.User;
 import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
-import ru.tokarev.cloudstorage.dto.UserReadDto;
-import ru.tokarev.cloudstorage.mapper.UserReadMapper;
+import ru.tokarev.cloudstorage.service.database.UserService;
 
 import java.util.Optional;
 

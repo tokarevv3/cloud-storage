@@ -21,23 +21,6 @@ import java.util.List;
 public class S3Service {
 
     private final MinioClient minioClient;
-    private final String defaultBucketName = "user-bucket-";
-
-    @Deprecated
-    public boolean createBucket(Long id) {
-
-        String bucketName = defaultBucketName + id;
-
-        try {
-            minioClient.makeBucket(MakeBucketArgs.builder()
-                    .bucket(bucketName)
-                    .build());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     public boolean createBucket(String bucketName) {
 
@@ -63,6 +46,7 @@ public class S3Service {
 
     public boolean uploadFile(Long userId, String filePathName, InputStream inputStream, long size) {
 
+        String defaultBucketName = "user-bucket-";
         String bucketName = defaultBucketName + userId;
 
         try {

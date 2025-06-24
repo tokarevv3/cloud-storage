@@ -1,12 +1,11 @@
 package ru.tokarev.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestConstructor;
 import ru.tokarev.cloudstorage.CloudStorageApplication;
-import ru.tokarev.cloudstorage.database.entity.User;
-import ru.tokarev.cloudstorage.dto.BucketCreateEditDto;
+import ru.tokarev.cloudstorage.service.database.BucketService;
+import ru.tokarev.cloudstorage.service.database.UserService;
 
 @SpringBootTest(classes = CloudStorageApplication.class)
 @RequiredArgsConstructor

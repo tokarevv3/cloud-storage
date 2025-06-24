@@ -35,8 +35,4 @@ public class Bucket {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="folder_id")
     private Folder rootFolder;
-
-    public void updateSize(Long size) {
-        this.size += size;
-    }
 }

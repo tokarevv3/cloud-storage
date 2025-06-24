@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.tokarev.cloudstorage.dto.BucketReadDto;
 import ru.tokarev.cloudstorage.dto.UserReadDto;
-import ru.tokarev.cloudstorage.service.BucketService;
-import ru.tokarev.cloudstorage.service.UserService;
+import ru.tokarev.cloudstorage.service.database.BucketService;
+import ru.tokarev.cloudstorage.service.database.UserService;
 
 import java.util.List;
 

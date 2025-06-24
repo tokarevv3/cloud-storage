@@ -6,7 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.tokarev.cloudstorage.service.FileFolderService;
 import ru.tokarev.cloudstorage.service.PreviewService;
+import ru.tokarev.cloudstorage.service.UploadDownloadService;
 
 import java.nio.charset.StandardCharsets;
 
@@ -17,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 public class WildcardController {
 
     private final PreviewService previewService;
+    private final UploadDownloadService uploadDownloadService;
+    private final FileFolderService fileFolderService;
 
     @GetMapping("/**")
     public ResponseEntity<?> getListOfFilesAndFolders(HttpServletRequest request) {
@@ -25,16 +29,17 @@ public class WildcardController {
         return ResponseEntity.ok(previewService.getListOfFilesAndFoldersInFolder(folderPath));
     }
 
+    @Deprecated
     @PostMapping(value = "/**")
     public ResponseEntity<?> uploadFileToFolder(HttpServletRequest request,
                                       @RequestPart(required = false) MultipartFile file,
                                       @RequestParam(required = false) String folderName) {
         if (file != null) {
             log.info("Trying to upload file");
-            return ResponseEntity.ok(previewService.uploadFile(file, getPath(request)));
+            return ResponseEntity.ok(uploadDownloadService.uploadFile(file, getPath(request)));
         } else if (folderName != null) {
             String folderPath = getPath(request);
-            return ResponseEntity.ok(previewService.createFolder(folderName, folderPath));
+            return ResponseEntity.ok(fileFolderService.createFolder(folderName, folderPath));
         } else {
             return ResponseEntity.badRequest().build();
         }

@@ -3,7 +3,9 @@ package ru.tokarev.cloudstorage.http.controller.rest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.tokarev.cloudstorage.service.FileFolderService;
 import ru.tokarev.cloudstorage.service.PreviewService;
+import ru.tokarev.cloudstorage.service.UploadDownloadService;
 
 import java.io.FileNotFoundException;
 
@@ -14,6 +16,8 @@ import java.io.FileNotFoundException;
 public class FileController {
 
     private final PreviewService previewService;
+    private final UploadDownloadService uploadDownloadService;
+    private final FileFolderService fileFolderService;
 
     @GetMapping
     public ResponseEntity<?> findFiles(@RequestParam("search") String search) {
@@ -22,7 +26,7 @@ public class FileController {
 
     @GetMapping("{fileId}/download")
     public ResponseEntity<byte[]> downloadFile(@PathVariable("fileId") Long downloadFileId) {
-        return previewService.getFileToClient(downloadFileId);
+        return uploadDownloadService.downloadFile(downloadFileId);
     }
 
     @GetMapping("{fileId}")
@@ -32,16 +36,16 @@ public class FileController {
 
     @DeleteMapping("{fileId}/delete")
     public ResponseEntity<?> deleteFile(@PathVariable("fileId") Long fileId) throws FileNotFoundException {
-        return ResponseEntity.ok(previewService.deleteFile(fileId));
+        return ResponseEntity.ok(fileFolderService.deleteFile(fileId));
     }
 
     @PatchMapping("{fileId}/move")
     public ResponseEntity<?> moveFile(@PathVariable Long fileId, @RequestParam("newParentFolderId") Long newParentFolderId) {
-        return ResponseEntity.ok(previewService.moveFile(fileId, newParentFolderId));
+        return ResponseEntity.ok(fileFolderService.moveFile(fileId, newParentFolderId));
     }
 
     @PatchMapping("{fileId}/rename")
     public ResponseEntity<?> renameFile(@PathVariable Long fileId, @RequestParam("newName") String newName) {
-        return ResponseEntity.ok(previewService.renameFile(fileId, newName));
+        return ResponseEntity.ok(fileFolderService.renameFile(fileId, newName));
     }
 }

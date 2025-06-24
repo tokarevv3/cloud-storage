@@ -3,19 +3,12 @@ package ru.tokarev.cloudstorage.http.controller.rest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import ru.tokarev.cloudstorage.database.entity.User;
-import ru.tokarev.cloudstorage.dto.JwtResponse;
 import ru.tokarev.cloudstorage.dto.LoginRequest;
 import ru.tokarev.cloudstorage.dto.UserCreateEditDto;
-import ru.tokarev.cloudstorage.provider.JwtTokenProvider;
-import ru.tokarev.cloudstorage.service.LoginService;
-
-import java.util.Optional;
+import ru.tokarev.cloudstorage.exception.creation.CreationException;
+import ru.tokarev.cloudstorage.service.security.AuthService;
+import ru.tokarev.cloudstorage.service.security.RegisterService;
 
 /**
  *  Front-end server send to /api/auth/login end-point loginRequest object with username and password.
@@ -31,27 +24,37 @@ import java.util.Optional;
 public class LoginController {
 
 
-    private final LoginService loginService;
+    private final RegisterService registerService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        log.info("User with login: " + loginRequest.getEmail() + " is trying to log in.");
+        log.info("User with login: {} is trying to log in.", loginRequest.getEmail());
 
-        return loginService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
+        var response = authService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
+
+        if (response != null) {
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.badRequest().body("Wrong username or password");
 
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserCreateEditDto userDto) {
-        log.info("Registering user with login: " + userDto.getEmail());
+        log.info("Registering user with login: {}", userDto.getEmail());
 
         try {
-            loginService.registerUser(userDto).orElseThrow(RuntimeException::new);
+            registerService.registerUser(userDto);
 
-            return loginService.authenticateUser(userDto.getEmail(), userDto.getRawPassword());
-        } catch (Exception e) {
-            log.error("Registration error: {}", e.getMessage());
-            return ResponseEntity.badRequest().body("Ошибка регистрации: " + e.getMessage());
+            var response =  authService.authenticateUser(userDto.getEmail(), userDto.getRawPassword());
+            if (response != null) {
+                return ResponseEntity.ok(response);
+            }
+            return ResponseEntity.badRequest().body("Wrong username or password");
+        } catch (CreationException ce) {
+            log.error("Registration error: {}", ce.getMessage());
+            return ResponseEntity.badRequest().body("Ошибка регистрации: " + ce.getMessage());
         }
     }
 

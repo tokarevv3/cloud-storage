@@ -1,4 +1,4 @@
-package ru.tokarev.cloudstorage.service;
+package ru.tokarev.cloudstorage.service.database;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +14,7 @@ import ru.tokarev.cloudstorage.dto.BucketReadDto;
 import ru.tokarev.cloudstorage.exception.BucketSizeExceededException;
 import ru.tokarev.cloudstorage.mapper.BucketCreateEditMapper;
 import ru.tokarev.cloudstorage.mapper.BucketReadMapper;
+import ru.tokarev.cloudstorage.service.S3Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,6 @@ public class BucketService {
     private final BucketRepository bucketRepository;
     private final BucketCreateEditMapper bucketCreateEditMapper;
     private final BucketReadMapper bucketReadMapper;
-    private final String defaultBucketName = "user-bucket-";
 
     @Value("${minio.user.capacity}")
     private Integer adminMaxBucketSize;
@@ -45,6 +45,7 @@ public class BucketService {
     }
 
     public Optional<Bucket> createBucket(User user) {
+        String defaultBucketName = "user-bucket-";
         String bucketName = defaultBucketName + user.getId();
 
         BucketCreateEditDto bucketDto = new BucketCreateEditDto(
@@ -60,7 +61,7 @@ public class BucketService {
         Bucket savedBucket = bucketRepository.saveAndFlush(bucket);
 
         if (s3Service.createBucket(bucketName)) {
-            return Optional.of(savedBucket); // возвращаем именно сохранённый объект с ID
+            return Optional.of(savedBucket);
         }
         return Optional.empty();
     }
@@ -75,14 +76,14 @@ public class BucketService {
         return bucketRepository.existsByRootFolder(folder);
     }
 
-    public void updateBucketSize(Bucket bucket, long size) throws BucketSizeExceededException {
+    public void updateBucketSize(Bucket bucket, long fileSize) throws BucketSizeExceededException {
 
         if (toggleCapacity) {
 
-            if (bucket.getSize() + size > maxBucketSize) {
+            if (bucket.getSize() + fileSize > maxBucketSize) {
                 throw new BucketSizeExceededException("Bucket size exceeded over limit.");
             } else {
-                bucket.setSize(bucket.getSize() + size);
+                bucket.setSize(bucket.getSize() + fileSize);
                 bucketRepository.saveAndFlush(bucket);
             }
         }
@@ -107,7 +108,7 @@ public class BucketService {
         toggleCapacity = toggle;
     }
 
-    public Long getMaxCapacity() {
+    public Long getCapacity() {
         return maxBucketSize;
     }
 }

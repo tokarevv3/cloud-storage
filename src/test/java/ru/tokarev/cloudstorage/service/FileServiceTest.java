@@ -1,17 +1,14 @@
 package ru.tokarev.cloudstorage.service;
 
-import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
-import io.minio.Result;
-import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestConstructor;
 import ru.tokarev.cloudstorage.TestCloudStorageApplication;
 import ru.tokarev.cloudstorage.database.repositorty.FileRepository;
 import ru.tokarev.cloudstorage.database.repositorty.FolderRepository;
+import ru.tokarev.cloudstorage.service.database.BucketService;
+import ru.tokarev.cloudstorage.service.database.FileService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

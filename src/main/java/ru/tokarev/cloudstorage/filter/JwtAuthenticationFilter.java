@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.tokarev.cloudstorage.provider.JwtTokenProvider;
-import ru.tokarev.cloudstorage.service.UserService;
+import ru.tokarev.cloudstorage.service.database.UserService;
 
 import java.io.IOException;
 

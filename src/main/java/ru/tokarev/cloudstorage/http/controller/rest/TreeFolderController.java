@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.tokarev.cloudstorage.database.entity.Bucket;
 import ru.tokarev.cloudstorage.dto.FolderTreeNode;
-import ru.tokarev.cloudstorage.service.FolderService;
-import ru.tokarev.cloudstorage.service.LoginService;
+import ru.tokarev.cloudstorage.service.security.AuthService;
+import ru.tokarev.cloudstorage.service.database.FolderService;
 
 import java.util.List;
 
@@ -20,12 +20,12 @@ import java.util.List;
 public class TreeFolderController {
 
     private final FolderService folderService;
-    private final LoginService loginService;
+    private final AuthService authService;
 
     @GetMapping("/folder-tree")
     public ResponseEntity<List<FolderTreeNode>> getFoldersInTree() {
 
-        Bucket bucket = loginService.getAuthenticatedUser().getBucket();
+        Bucket bucket = authService.getAuthenticatedUser().getBucket();
         log.info("Trying to get tree of folders for userbucket: {}", bucket.getName());
         List<FolderTreeNode> tree = folderService.getUserFolderTree(bucket);
         return ResponseEntity.ok(tree);

@@ -1,4 +1,4 @@
-package ru.tokarev.cloudstorage.service;
+package ru.tokarev.cloudstorage.service.database;
 
 
 import lombok.RequiredArgsConstructor;
@@ -44,9 +44,10 @@ public class FileService {
         try {
             bucketService.updateBucketSize(bucket, size);
             fileRepository.saveAndFlush(file);
+            log.info("Successful uploaded file to bucket.");
             return true;
         } catch (BucketSizeExceededException e) {
-            log.error(e.getMessage());
+            log.error("Failed to upload file - Bucket`s size is exceeded.");
             return false;
         }
 
@@ -56,10 +57,15 @@ public class FileService {
         getFile(id).ifPresent(file -> {
             Bucket bucket = file.getFolder().getBucket();
             Long fileSize = file.getFileSize();
-            bucket.updateSize(-fileSize);
+            try {
+                bucketService.updateBucketSize(bucket, -fileSize);
+            } catch (BucketSizeExceededException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         fileRepository.deleteById(id);
+        log.info("File {} deleted.", id);
     }
 
     public File saveFile(File file) {

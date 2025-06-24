@@ -1,4 +1,4 @@
-package ru.tokarev.cloudstorage.service;
+package ru.tokarev.cloudstorage.service.database;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +14,7 @@ import ru.tokarev.cloudstorage.dto.FolderReadDto;
 import ru.tokarev.cloudstorage.dto.FolderTreeNode;
 import ru.tokarev.cloudstorage.mapper.FolderCreateEditMapper;
 import ru.tokarev.cloudstorage.mapper.FolderReadMapper;
+import ru.tokarev.cloudstorage.service.S3Service;
 
 import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
@@ -44,7 +45,7 @@ public class FolderService {
                 parentFolder,
                 parentFolder.getBucket());
 
-        log.info("Trying to create folder with part : " + folderCreateEditDto.getPath());
+        log.info("Trying to create folder with part : {}", folderCreateEditDto.getPath());
 
         if (s3Service.createFolder(
                 parentFolder.getBucket().getName(),
@@ -123,7 +124,7 @@ public class FolderService {
         folderRepository.flush();
     }
 
-    public List<FolderTreeNode> getUserFolderTree(Bucket userBucket) {;
+    public List<FolderTreeNode> getUserFolderTree(Bucket userBucket) {
 
         List<Folder> userFolders = folderRepository.findByBucketId(userBucket.getId());
 

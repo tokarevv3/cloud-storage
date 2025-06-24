@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import ru.tokarev.cloudstorage.database.entity.Role;
-import ru.tokarev.cloudstorage.service.UserService;
+import ru.tokarev.cloudstorage.service.database.UserService;
 
 import java.util.Date;
 

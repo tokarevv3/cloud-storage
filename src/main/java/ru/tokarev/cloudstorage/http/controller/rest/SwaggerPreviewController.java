@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.tokarev.cloudstorage.service.FileService;
 import ru.tokarev.cloudstorage.service.PreviewService;
+import ru.tokarev.cloudstorage.service.UploadDownloadService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -18,6 +18,7 @@ import java.util.Map;
 public class SwaggerPreviewController {
 
     private final PreviewService previewService;
+    private final UploadDownloadService uploadDownloadService;
 
     @GetMapping("/browse")
     public Map<Long, String> getListOfFilesAndFolders(@RequestParam(required = false, defaultValue = "") String path) {
@@ -27,7 +28,7 @@ public class SwaggerPreviewController {
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public boolean uploadFileToFolder(@RequestParam(required = false, defaultValue = "") String path,
                                       @RequestPart("file") MultipartFile file) {
-        return previewService.uploadFile(file, path);
+        return uploadDownloadService.uploadFile(file, path);
     }
 
     private String getPath(HttpServletRequest request) {
