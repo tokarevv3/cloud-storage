@@ -119,30 +119,27 @@ public class S3Service {
         }
     }
 
-    private void deleteObjectInFolder(String bucketName, String prefix) {
-
+    private void deleteObjectInFolder(String bucketName, String prefix) throws Exception {
         if (prefix.startsWith("/")) {
             prefix = prefix.substring(1);
         }
         log.info("Trying to delete folder: " + prefix + " in bucket: " + bucketName);
 
-        try {
-            Iterable<Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder()
-                    .recursive(true)
+        Iterable<Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder()
+                .recursive(true)
+                .bucket(bucketName)
+                .prefix(prefix)
+                .build());
+
+        for (Result<Item> result : results) {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .object(result.get().objectName())
                     .bucket(bucketName)
-                    .prefix(prefix)
                     .build());
-            for (Result<Item> result : results) {
-                minioClient.removeObject(RemoveObjectArgs.builder()
-                        .object(result.get().objectName())
-                        .bucket(bucketName)
-                        .build());
-            }
-            log.info("Deleted list of object");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        log.info("Deleted list of object");
     }
+
 
     public boolean deleteFile(String bucketName, String fileFullPath) {
         try {

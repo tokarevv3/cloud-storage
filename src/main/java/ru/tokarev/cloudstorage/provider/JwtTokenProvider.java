@@ -22,7 +22,6 @@ public class JwtTokenProvider {
     // Метод для генерации токена
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();  // Получаем имя пользователя
-        Role userRole = userService.findByUsername(username).get().getRole();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION_MS);// Устанавливаем срок действия токена
 

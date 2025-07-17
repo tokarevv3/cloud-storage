@@ -5,12 +5,12 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "buckets")
 @Data
 @ToString(exclude = {"folders", "user", "rootFolder"})
-@EqualsAndHashCode(of = "name")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -35,4 +35,18 @@ public class Bucket {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="folder_id")
     private Folder rootFolder;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Bucket)) return false;
+        Bucket bucket = (Bucket) o;
+        return Objects.equals(id, bucket.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
 }

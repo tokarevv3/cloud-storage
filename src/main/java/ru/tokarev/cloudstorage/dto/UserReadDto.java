@@ -15,4 +15,5 @@ public class UserReadDto {
     BucketReadDto bucket;
     Role role;
     Long maxCapacityInGb;
+
 }

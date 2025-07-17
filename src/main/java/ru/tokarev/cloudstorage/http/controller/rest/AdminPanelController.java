@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.tokarev.cloudstorage.dto.BucketReadDto;
 import ru.tokarev.cloudstorage.dto.UserReadDto;
+import ru.tokarev.cloudstorage.service.BucketSizeService;
 import ru.tokarev.cloudstorage.service.database.BucketService;
 import ru.tokarev.cloudstorage.service.database.UserService;
 
@@ -16,6 +17,7 @@ public class AdminPanelController {
 
     private final UserService userService;
     private final BucketService bucketService;
+    private final BucketSizeService bucketSizeService;
 
     @GetMapping("/allow")
     public boolean allow() {
@@ -44,12 +46,12 @@ public class AdminPanelController {
 
     @PostMapping("/capacity")
     public boolean changeUserCapacity(@RequestParam Integer capacity) {
-        return bucketService.setCapacity(capacity);
+        return bucketSizeService.setCapacity(capacity);
     }
 
     @PatchMapping("/capacity")
     public boolean toggleUserCapacity(@RequestParam Boolean toggle) {
-        bucketService.toggleCapacity(toggle);
+        bucketSizeService.toggleCapacity(toggle);
         return true;
     }
 }
